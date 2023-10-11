@@ -1,6 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="39dp"
+        android:text="Medicine Name: "
+        android:textSize="18sp" />
+
+    <TextView
+        android:id="@+id/medicineName"
+        android:layout_width="match_parent"
+        android:layout_height="38dp"
+        android:textSize="16sp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="51dp"
+        android:text="Dosage: "
+        android:textSize="18sp" />
+
+    <TextView
+        android:id="@+id/dosage"
+        android:layout_width="match_parent"
+        android:layout_height="38dp"
+        android:textSize="16sp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="43dp"
+        android:text="Frequency: "
+        android:textSize="18sp" />
+
+    <TextView
+        android:id="@+id/frequency"
+        android:layout_width="match_parent"
+        android:layout_height="34dp"
+        android:textSize="16sp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="37dp"
+        android:text="Expiration: "
+        android:textSize="18sp" />
+
+    <TextView
+        android:id="@+id/expiration"
+        android:layout_width="match_parent"
+        android:layout_height="39dp"
+        android:textSize="16sp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="39dp"
+        android:text="Refill Date: "
+        android:textSize="18sp" />
+
+    <TextView
+        android:id="@+id/refillDate"
+        android:layout_width="match_parent"
+        android:layout_height="41dp"
+        android:textSize="16sp" />
+</LinearLayout>
