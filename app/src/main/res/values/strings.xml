@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">MedAssist</string>
+    <string name="search">Search</string>
+    <string name="past">Past\nMedicine</string>
+    <string name="current">Current\nMedicine</string>
+    <string name="add">Add\nMedicine</string>
+    <string name="contact">Contact us at : medAssist2023@gmail.com</string>
 </resources>

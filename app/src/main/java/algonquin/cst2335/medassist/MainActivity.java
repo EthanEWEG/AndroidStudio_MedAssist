@@ -1,36 +1,66 @@
 package algonquin.cst2335.medassist;
 
-import android.content.Intent;
-import android.os.Bundle;
-import android.widget.Button;
-import android.widget.EditText;
-
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
-public class MainActivity extends AppCompatActivity{
-    EditText emailEditText;
-    Button loginButton;
+import android.os.Bundle;
+
+import java.util.List;
+
+import algonquin.cst2335.medassist.databinding.MedViewBinding;
+
+public class MainActivity extends AppCompatActivity {
+
+    MedViewBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.login_med);
 
-        emailEditText = findViewById(R.id.emailEditText);
-        loginButton = findViewById(R.id.loginButton);
+        binding = MedViewBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
-        loginButton.setOnClickListener(view -> {
-            // Get the email address from the EditText
-            String emailAddress = emailEditText.getText().toString();
+        binding.current.setOnClickListener(click -> {
 
-            // Create an Intent to transition to SecondActivity
-            Intent nextPage = new Intent(MainActivity.this, SecondActivity.class);
+            //Hides past recycler view -> displays current recycler view
 
-            // Pass the email address to the next activity
-            nextPage.putExtra("EmailAddress", emailAddress);
-
-            // Start the new activity
-            startActivity(nextPage);
         });
+
+        binding.past.setOnClickListener(click -> {
+
+            //Hides current recycler view -> displays past recycler view
+
+        });
+
+        binding.add.setOnClickListener(click -> {
+
+            //inflate add_fragment
+
+        });
+
+        binding.search.setOnClickListener(click -> {
+
+            //inflate search_fragment
+
+        });
+
+        binding.settings.setOnClickListener(click -> {
+
+            //inflate settings_fragment
+
+        });
+
+        RecyclerView recyclerView = findViewById(R.id.recyclerView);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(layoutManager);
+
+        MedDatabase medDb = new MedDatabase(this);
+        medDb.deleteMostRecentMedicine();
+        medDb.insertMedicine(new Medicine("Tylenol", "500mg", "2 times a day", "2023-10-10", "2023-10-11"));
+        List<Medicine> medicineList = medDb.getAllMedicines();
+        MedicineAdapter adapter = new MedicineAdapter(medicineList);
+        recyclerView.setAdapter(adapter);
+
     }
 }
