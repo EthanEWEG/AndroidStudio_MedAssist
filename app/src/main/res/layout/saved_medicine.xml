@@ -39,7 +39,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
-        android:text="Dosage:"
+        android:text="@string/textDosage"
         app:layout_constraintStart_toStartOf="@id/name"
         app:layout_constraintTop_toBottomOf="@id/name" />
 
@@ -57,7 +57,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="2dp"
-        android:text="Frequency:"
+        android:text="@string/textFrequency"
         app:layout_constraintStart_toStartOf="@id/dosageTitle"
         app:layout_constraintTop_toBottomOf="@id/dosageTitle" />
 
@@ -75,7 +75,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="2dp"
-        android:text="Quantity:"
+        android:text="@string/textQuantity"
         app:layout_constraintStart_toStartOf="@id/frequencyTitle"
         app:layout_constraintTop_toBottomOf="@id/frequencyTitle" />
 

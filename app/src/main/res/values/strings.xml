@@ -5,4 +5,16 @@
     <string name="current">Current\nMedicine</string>
     <string name="add">Add\nMedicine</string>
     <string name="contact">Contact us at : medAssist2023@gmail.com</string>
+    <string name="textMedName">Medicine Name:</string>
+    <string name="textDosage">Dosage Per:</string>
+    <string name="textFrequency">Frequency:</string>
+    <string name="textRefill">Refills:</string>
+    <string name="textDuration">Duration:</string>
+    <string name="textExpiration">Expiration Date:</string>
+    <string name="textInstructions">Special Instructions:</string>
+    <string name="textQR">Scan QR Code</string>
+    <string name="textQuantity">Quantity:</string>
+    <string name="dosageUnit">mg/mL</string>
+    <string name="capture">capture</string>
+    <string name="submit">submit</string>
 </resources>

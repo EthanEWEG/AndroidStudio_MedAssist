@@ -32,7 +32,9 @@
                 app:layout_constraintEnd_toStartOf="@id/past"
                 app:layout_constraintTop_toTopOf="parent"
                 android:background="@drawable/menu_border"
-                android:textColor="#000000" />
+                android:textColor="#000000"
+                app:backgroundTint="@null"
+                android:layout_marginEnd="-3dp" />
             <Button
                 android:id="@+id/past"
                 android:layout_width="wrap_content"
@@ -42,7 +44,9 @@
                 app:layout_constraintEnd_toStartOf="@id/add"
                 app:layout_constraintTop_toTopOf="parent"
                 android:background="@drawable/menu_border"
-                android:textColor="#000000" />
+                android:textColor="#000000"
+                app:backgroundTint="@null"
+                android:layout_marginEnd="-3dp" />
             <Button
                 android:id="@+id/add"
                 android:layout_width="wrap_content"
@@ -52,7 +56,9 @@
                 app:layout_constraintEnd_toStartOf="@id/search"
                 app:layout_constraintTop_toTopOf="parent"
                 android:background="@drawable/menu_border"
-                android:textColor="#000000" />
+                android:textColor="#000000"
+                app:backgroundTint="@null"
+                android:layout_marginEnd="-3dp"/>
             <Button
                 android:id="@+id/search"
                 android:layout_width="wrap_content"
@@ -62,7 +68,8 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 android:background="@drawable/menu_border"
-                android:textColor="#000000" />
+                android:textColor="#000000"
+                app:backgroundTint="@null" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerView"
