@@ -1,67 +1,208 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fragmentAdd"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:layout_height="match_parent"
+    android:layout_marginTop="60dp"
+    android:layout_marginBottom="50dp">
 
     <TextView
-        android:layout_width="match_parent"
-        android:layout_height="39dp"
-        android:text="Medicine Name: "
-        android:textSize="18sp" />
+        android:id="@+id/medName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Med_Name"
+        android:textStyle="bold"
+        android:layout_marginTop="30dp"
+        android:textSize="26sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
 
     <TextView
-        android:id="@+id/medicineName"
-        android:layout_width="match_parent"
-        android:layout_height="38dp"
-        android:textSize="16sp" />
+        android:id="@+id/medDosageTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/textDosage"
+        android:layout_marginTop="25dp"
+        android:layout_marginStart="50dp"
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/medName" />
+    <TextView
+        android:id="@+id/medDosageValue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Dosage_Amt"
+        android:textStyle="bold"
+        android:layout_marginStart="5dp"
+        android:textSize="20sp"
+        app:layout_constraintStart_toEndOf="@id/medDosageTitle"
+        app:layout_constraintTop_toTopOf="@id/medDosageTitle" />
+    <TextView
+        android:id="@+id/medDosageUnit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/dosageUnit"
+        android:layout_marginStart="5dp"
+        android:textSize="20sp"
+        app:layout_constraintStart_toEndOf="@id/medDosageValue"
+        app:layout_constraintTop_toTopOf="@id/medDosageValue" />
+
+
 
     <TextView
-        android:layout_width="match_parent"
-        android:layout_height="51dp"
-        android:text="Dosage: "
-        android:textSize="18sp" />
+        android:id="@+id/medQuantityTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/textQuantity"
+        android:layout_marginTop="15dp"
+        android:layout_marginStart="50dp"
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/medDosageTitle" />
+    <TextView
+        android:id="@+id/medQuantityValue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Quantity_Amt"
+        android:textStyle="bold"
+        android:layout_marginStart="5dp"
+        android:textSize="20sp"
+        app:layout_constraintStart_toEndOf="@id/medQuantityTitle"
+        app:layout_constraintTop_toTopOf="@id/medQuantityTitle" />
+
+
 
     <TextView
-        android:id="@+id/dosage"
-        android:layout_width="match_parent"
-        android:layout_height="38dp"
-        android:textSize="16sp" />
+        android:id="@+id/medFrequencyTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/textFrequency"
+        android:layout_marginTop="15dp"
+        android:layout_marginStart="50dp"
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/medQuantityTitle" />
+    <TextView
+        android:id="@+id/medFrequencyValue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Frequency_Amt"
+        android:textStyle="bold"
+        android:layout_marginStart="5dp"
+        android:textSize="20sp"
+        app:layout_constraintStart_toEndOf="@id/medFrequencyTitle"
+        app:layout_constraintTop_toTopOf="@id/medFrequencyTitle" />
+
+
 
     <TextView
-        android:layout_width="match_parent"
-        android:layout_height="43dp"
-        android:text="Frequency: "
-        android:textSize="18sp" />
+        android:id="@+id/medRefillTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/textRefill"
+        android:layout_marginTop="15dp"
+        android:layout_marginStart="50dp"
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/medFrequencyTitle" />
+    <TextView
+        android:id="@+id/medRefillValue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Refill_Amt"
+        android:textStyle="bold"
+        android:layout_marginStart="5dp"
+        android:textSize="20sp"
+        app:layout_constraintStart_toEndOf="@id/medRefillTitle"
+        app:layout_constraintTop_toTopOf="@id/medRefillTitle" />
+
+
 
     <TextView
-        android:id="@+id/frequency"
-        android:layout_width="match_parent"
-        android:layout_height="34dp"
-        android:textSize="16sp" />
+        android:id="@+id/medDurationTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/textDuration"
+        android:layout_marginTop="15dp"
+        android:layout_marginStart="50dp"
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/medRefillTitle" />
+    <TextView
+        android:id="@+id/medDurationValue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Duration_Date"
+        android:textStyle="bold"
+        android:layout_marginStart="5dp"
+        android:textSize="20sp"
+        app:layout_constraintStart_toEndOf="@id/medDurationTitle"
+        app:layout_constraintTop_toTopOf="@id/medDurationTitle" />
+
+
 
     <TextView
-        android:layout_width="match_parent"
-        android:layout_height="37dp"
-        android:text="Expiration: "
-        android:textSize="18sp" />
+        android:id="@+id/medExpirationTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/textExpiration"
+        android:layout_marginTop="15dp"
+        android:layout_marginStart="50dp"
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/medDurationTitle" />
+    <TextView
+        android:id="@+id/medExpirationValue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Expiration_Date"
+        android:textStyle="bold"
+        android:layout_marginStart="5dp"
+        android:textSize="20sp"
+        app:layout_constraintStart_toEndOf="@id/medExpirationTitle"
+        app:layout_constraintTop_toTopOf="@id/medExpirationTitle" />
+
+
 
     <TextView
-        android:id="@+id/expiration"
-        android:layout_width="match_parent"
-        android:layout_height="39dp"
-        android:textSize="16sp" />
-
+        android:id="@+id/medInstructionsTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/textInstructions"
+        android:layout_marginTop="15dp"
+        android:layout_marginStart="50dp"
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/medExpirationTitle" />
     <TextView
-        android:layout_width="match_parent"
-        android:layout_height="39dp"
-        android:text="Refill Date: "
-        android:textSize="18sp" />
+        android:id="@+id/medInstructionsValue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Special_Instructions"
+        android:textStyle="bold"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="5dp"
+        android:textSize="20sp"
+        android:breakStrategy="simple"
+        android:lines="8"
+        android:paddingEnd="60dp"
+        app:layout_constraintStart_toStartOf="@id/medInstructionsTitle"
+        app:layout_constraintTop_toBottomOf="@id/medInstructionsTitle" />
 
-    <TextView
-        android:id="@+id/refillDate"
-        android:layout_width="match_parent"
-        android:layout_height="41dp"
-        android:textSize="16sp" />
-</LinearLayout>
+
+
+    <Button
+        android:id="@+id/medDelete"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Delete"
+        app:layout_constraintTop_toBottomOf="@id/medInstructionsValue"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -22,7 +22,7 @@ public class MedicineAdapter extends RecyclerView.Adapter<MedicineAdapter.Medici
     @NonNull
     @Override
     public MedicineViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.med_fragment, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.saved_medicine, parent, false);
         return new MedicineViewHolder(view);
     }
 
@@ -32,8 +32,6 @@ public class MedicineAdapter extends RecyclerView.Adapter<MedicineAdapter.Medici
         holder.medicineName.setText(medicine.getName());
         holder.dosage.setText(medicine.getDosage());
         holder.frequency.setText(medicine.getFrequency());
-        holder.expiration.setText(medicine.getExpiration());
-        holder.refillDate.setText(medicine.getRefillDate());
     }
 
     @Override
@@ -45,17 +43,13 @@ public class MedicineAdapter extends RecyclerView.Adapter<MedicineAdapter.Medici
         TextView medicineName;
         TextView dosage;
         TextView frequency;
-        TextView expiration;
-        TextView refillDate;
 
 
         public MedicineViewHolder(View itemView) {
             super(itemView);
-            medicineName = itemView.findViewById(R.id.medicineName);
+            medicineName = itemView.findViewById(R.id.name);
             dosage = itemView.findViewById(R.id.dosage);
             frequency = itemView.findViewById(R.id.frequency);
-            expiration = itemView.findViewById(R.id.expiration);
-            refillDate = itemView.findViewById(R.id.refillDate);
         }
     }
 }

@@ -21,6 +21,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 public class MainActivity extends AppCompatActivity {
 
     private boolean isAddFragmentVisible = false;
+    private boolean isSearchFragmentVisible = false;
 
     MedViewBinding binding;
 
@@ -40,8 +41,9 @@ public class MainActivity extends AppCompatActivity {
                 fragmentTransaction.remove(currentFragment);
                 fragmentTransaction.commit();
             }
-            //resets addFragment flag
+            //resets add/searchFragment flag
             isAddFragmentVisible = false;
+            isSearchFragmentVisible = false;
 
             //TODO current medicine recycler view list to be added
         });
@@ -55,13 +57,17 @@ public class MainActivity extends AppCompatActivity {
                 fragmentTransaction.remove(currentFragment);
                 fragmentTransaction.commit();
             }
-            //resets addFragment flag
+            //resets add/searchFragment flag
             isAddFragmentVisible = false;
+            isSearchFragmentVisible = false;
 
             //TODO past medicine recycler view list to be added
         });
 
         binding.add.setOnClickListener(click -> {
+
+            //resets searchFragment flag
+            isSearchFragmentVisible = false;
 
             if (!isAddFragmentVisible) {
                 AddFragment addFragment = new AddFragment();
@@ -79,13 +85,25 @@ public class MainActivity extends AppCompatActivity {
 
         binding.search.setOnClickListener(click -> {
 
-            //inflate search_fragment
+            //resets addFragment flag
+            isAddFragmentVisible = false;
+
+            if (!isSearchFragmentVisible) {
+                SearchFragment searchFragment = new SearchFragment();
+                FragmentManager fragmentManager = getSupportFragmentManager();
+                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                // Replace the current fragment with the AddFragment
+                fragmentTransaction.replace(R.id.fragmentLocation, searchFragment);
+                fragmentTransaction.commit();
+
+                isSearchFragmentVisible = true;
+            }
 
         });
 
         binding.settings.setOnClickListener(click -> {
 
-            //inflate settings_fragment
+            //open settings dialogue box
 
         });
 

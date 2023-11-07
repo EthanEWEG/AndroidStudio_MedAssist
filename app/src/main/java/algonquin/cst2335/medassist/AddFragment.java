@@ -9,12 +9,16 @@ import android.view.inputmethod.InputMethodManager;
 
 import androidx.annotation.NonNull;
 import androidx.camera.core.CameraSelector;
+import androidx.camera.core.ImageCapture;
+import androidx.camera.core.ImageCaptureException;
+import androidx.camera.core.ImageProxy;
 import androidx.camera.core.Preview;
 import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.view.PreviewView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.DialogFragment;
+import androidx.lifecycle.LifecycleOwner;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
@@ -103,7 +107,10 @@ public class AddFragment extends DialogFragment {
                 Preview preview = new Preview.Builder().build();
                 preview.setSurfaceProvider(cameraPreviewView.getSurfaceProvider());
 
-                // Set up the image capture use case if needed
+                // Sets up the image capture use case if needed
+                ImageCapture imageCapture = new ImageCapture.Builder()
+                        .setTargetRotation(requireActivity().getWindowManager().getDefaultDisplay().getRotation())
+                        .build();
 
                 // Create a CameraSelector and select the desired camera (e.g., front or rear)
                 CameraSelector cameraSelector = new CameraSelector.Builder()
@@ -111,7 +118,11 @@ public class AddFragment extends DialogFragment {
                         .build();
 
                 // Attach the use cases to the camera
-                cameraProvider.bindToLifecycle(this, cameraSelector, preview);
+                cameraProvider.unbindAll();
+                cameraProvider.bindToLifecycle((LifecycleOwner) requireActivity(), cameraSelector, preview, imageCapture);
+
+
+
             } catch (ExecutionException | InterruptedException e) {
                 e.printStackTrace();
             }
