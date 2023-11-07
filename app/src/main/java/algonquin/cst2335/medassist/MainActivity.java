@@ -142,17 +142,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         binding.settings.setOnClickListener(click -> {
-            if (!isSearchFragmentVisible) {
-                // Create a new instance of SearchFragment
-                SearchFragment searchFragment = new SearchFragment();
-                FragmentManager fragmentManager = getSupportFragmentManager();
-                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                // Replace the current fragment with the SearchFragment instance
-                fragmentTransaction.replace(R.id.fragmentLocation, searchFragment);
-                fragmentTransaction.commit();
 
-                isSearchFragmentVisible = true;
-            }
             //open settings dialogue box
 
         });

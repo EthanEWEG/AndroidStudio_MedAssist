@@ -60,8 +60,6 @@ public class MedicineAdapter extends RecyclerView.Adapter<MedicineAdapter.Medici
             dosage = itemView.findViewById(R.id.dosage);
             frequency = itemView.findViewById(R.id.frequency);
             quantity = itemView.findViewById(R.id.quantity);
-            expiration = itemView.findViewById(R.id.expiration);
-            refillDate = itemView.findViewById(R.id.refillDate);
 
         }
     }
