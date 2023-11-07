@@ -25,7 +25,7 @@
         app:layout_constraintStart_toStartOf="parent"/>
 
     <TextView
-        android:id="@+id/name"
+        android:id="@+id/medicineName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
@@ -40,8 +40,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
         android:text="@string/textDosage"
-        app:layout_constraintStart_toStartOf="@id/name"
-        app:layout_constraintTop_toBottomOf="@id/name" />
+        app:layout_constraintStart_toStartOf="@id/medicineName"
+        app:layout_constraintTop_toBottomOf="@id/medicineName" />
 
     <TextView
         android:id="@+id/dosage"
@@ -84,7 +84,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="4dp"
-        android:text="qantity"
+        android:text="quantity"
         app:layout_constraintStart_toEndOf="@id/quantityTitle"
         app:layout_constraintTop_toTopOf="@id/quantityTitle" />
 

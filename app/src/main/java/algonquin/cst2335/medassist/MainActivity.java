@@ -9,14 +9,13 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import algonquin.cst2335.medassist.databinding.MedViewBinding;
-
-import androidx.camera.core.CameraSelector;
-import androidx.camera.lifecycle.ProcessCameraProvider;
-import androidx.camera.view.PreviewView;
-import com.google.common.util.concurrent.ListenableFuture;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -32,6 +31,16 @@ public class MainActivity extends AppCompatActivity {
         binding = MedViewBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        RecyclerView recyclerView = findViewById(R.id.recyclerView);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(layoutManager);
+        MedDatabase medDb = new MedDatabase(this);
+
+        //medDb.deleteMostRecentMedicine();
+//        List<Medicine> medicineList = medDb.getAllMedicines();
+//        AtomicReference<MedicineAdapter> adapter = new AtomicReference<>(new MedicineAdapter(medicineList));
+//        recyclerView.setAdapter(adapter.get());
+
         binding.current.setOnClickListener(click -> {
             //Hides past recycler view -> displays current recycler view
             //Removes the current fragment (if any)
@@ -45,7 +54,23 @@ public class MainActivity extends AppCompatActivity {
             isAddFragmentVisible = false;
             isSearchFragmentVisible = false;
 
-            //TODO current medicine recycler view list to be added
+            List<Medicine> medicineList = medDb.getAllMedicines();
+            List<Medicine> currentMedList = new ArrayList<>();
+
+            LocalDate currentDate = LocalDate.now();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+
+            for(Medicine medicine : medicineList){
+                String expirationDateString = medicine.getExpiration();
+                LocalDate expirationDate = LocalDate.parse(expirationDateString, formatter);
+
+                if(currentDate.isBefore(expirationDate)){
+                    currentMedList.add(medicine);
+                }
+            }
+            AtomicReference<MedicineAdapter> adapter = new AtomicReference<>(new MedicineAdapter(currentMedList));
+            recyclerView.setAdapter(adapter.get());
+
         });
 
         binding.past.setOnClickListener(click -> {
@@ -61,7 +86,22 @@ public class MainActivity extends AppCompatActivity {
             isAddFragmentVisible = false;
             isSearchFragmentVisible = false;
 
-            //TODO past medicine recycler view list to be added
+            List<Medicine> medicineList = medDb.getAllMedicines();
+            List<Medicine> currentMedList = new ArrayList<>();
+
+            LocalDate currentDate = LocalDate.now();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+
+            for(Medicine medicine : medicineList){
+                String expirationDateString = medicine.getExpiration();
+                LocalDate expirationDate = LocalDate.parse(expirationDateString, formatter);
+
+                if(currentDate.isAfter(expirationDate)){
+                    currentMedList.add(medicine);
+                }
+            }
+            AtomicReference<MedicineAdapter> adapter = new AtomicReference<>(new MedicineAdapter(currentMedList));
+            recyclerView.setAdapter(adapter.get());
         });
 
         binding.add.setOnClickListener(click -> {
@@ -102,21 +142,28 @@ public class MainActivity extends AppCompatActivity {
         });
 
         binding.settings.setOnClickListener(click -> {
+            if (!isSearchFragmentVisible) {
+                // Create a new instance of SearchFragment
+                SearchFragment searchFragment = new SearchFragment();
+                FragmentManager fragmentManager = getSupportFragmentManager();
+                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                // Replace the current fragment with the SearchFragment instance
+                fragmentTransaction.replace(R.id.fragmentLocation, searchFragment);
+                fragmentTransaction.commit();
 
+                isSearchFragmentVisible = true;
+            }
             //open settings dialogue box
 
         });
 
-        RecyclerView recyclerView = findViewById(R.id.recyclerView);
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-        recyclerView.setLayoutManager(layoutManager);
 
-        MedDatabase medDb = new MedDatabase(this);
-        medDb.deleteMostRecentMedicine();
-        medDb.insertMedicine(new Medicine("Tylenol", "500mg", "2 times a day", "2023-10-10", "2023-10-11"));
-        List<Medicine> medicineList = medDb.getAllMedicines();
-        MedicineAdapter adapter = new MedicineAdapter(medicineList);
-        recyclerView.setAdapter(adapter);
+//        MedDatabase medDb = new MedDatabase(this);
+//        medDb.deleteMostRecentMedicine();
+//        medDb.insertMedicine(new Medicine("Tylenol", "500mg", "2 times a day", "2023-10-10", "2023-10-11"));
+//        List<Medicine> medicineList = medDb.getAllMedicines();
+//        MedicineAdapter adapter = new MedicineAdapter(medicineList);
+//        recyclerView.setAdapter(adapter);
 
     }
 }

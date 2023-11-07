@@ -18,16 +18,18 @@ import androidx.camera.view.PreviewView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.DialogFragment;
-import androidx.lifecycle.LifecycleOwner;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import algonquin.cst2335.medassist.databinding.AddFragmentBinding;
 
 import android.content.pm.PackageManager;
 import android.Manifest;
+import android.widget.Toast;
 
 public class AddFragment extends DialogFragment {
 
@@ -36,6 +38,15 @@ public class AddFragment extends DialogFragment {
     private PreviewView cameraPreviewView;
     // Define a constant for camera permission request
     private static final int REQUEST_CAMERA_PERMISSION = 1;
+
+
+    private void refreshMedicineList() {
+        MedDatabase medDb = new MedDatabase(requireContext());
+        List<Medicine> medicineList = medDb.getAllMedicines();
+        MedicineAdapter adapter = new MedicineAdapter(medicineList);
+        RecyclerView recyclerView = requireActivity().findViewById(R.id.recyclerView);
+        recyclerView.setAdapter(adapter);
+    }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -47,7 +58,7 @@ public class AddFragment extends DialogFragment {
 
         cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext());
 
-        binding.cameraButton.setOnClickListener(v ->  {
+        binding.cameraButton.setOnClickListener(v -> {
             // Permissions are granted, proceed with camera setup
             closeKeyboard();
 
@@ -83,6 +94,38 @@ public class AddFragment extends DialogFragment {
                         requestCameraPermissions();
                     }
                 }
+            }
+        });
+
+        //Submits info for med
+        binding.submitButton.setOnClickListener(click ->
+        {
+            // Retrieve user input for Medicine Name, Dosage, Quantity, Frequency, Refills, Duration, Expiration date, and special instructions
+            String medName = binding.editMedName.getText().toString();
+            String dosage = binding.editDosage.getText().toString();
+            String quantity = binding.editQuantity.getText().toString();
+            String frequency = binding.editFrequency.getText().toString();
+            String refills = binding.editRefills.getText().toString();
+            String duration = binding.editDuration.getText().toString();
+            String expiration = binding.editExpiration.getText().toString();
+            String instructions = binding.editInstructions.getText().toString();
+
+            // Create a Medicine object with user input
+            Medicine newMedicine = new Medicine(medName, dosage, quantity, frequency, refills, duration, expiration, instructions);
+
+            // Insert the new medicine into the database
+            MedDatabase medDb = new MedDatabase(requireContext());
+            long newRowId = medDb.insertMedicine(newMedicine);
+
+            if (newRowId != -1) {
+                // Successfully added the medicine to the database, refresh the RecyclerView
+                Toast.makeText(requireContext(), expiration + " is date you entered for expiration", Toast.LENGTH_SHORT).show();
+                refreshMedicineList();
+                // Close the AddFragment or update UI as needed
+                dismiss();
+            } else {
+                // Handle insertion failure
+                Toast.makeText(requireContext(), "Failed to add medicine. Please try again.", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -139,8 +182,8 @@ public class AddFragment extends DialogFragment {
         }
     }
 
-    private void inputElements(int i){
-        if (i == 1){
+    private void inputElements(int i) {
+        if (i == 1) {
             binding.editMedName.setVisibility(View.GONE);
             binding.textMedName.setVisibility(View.GONE);
             binding.editDosage.setVisibility(View.GONE);

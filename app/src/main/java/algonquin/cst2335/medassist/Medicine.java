@@ -4,16 +4,25 @@ public class Medicine {
     private long Id;
     private String name;
     private String dosage;
+    private String quantity;
     private String frequency;
+    private String refills;
+    private String duration;
     private String expiration;
-    private String whenToRefill;
+    private String instructions;
 
-    public Medicine(String name, String dosage, String frequency, String expiration, String whenToRefill) {
+    public Medicine(){
+
+    }
+    public Medicine(String name, String dosage, String quantity, String frequency, String refills, String duration, String expiration, String instructions) {
         this.name = name;
         this.dosage = dosage;
+        this.quantity = quantity;
         this.frequency = frequency;
+        this.refills = refills;
+        this.duration = duration;
         this.expiration = expiration;
-        this.whenToRefill = whenToRefill;
+        this.instructions = instructions;
     }
 
     public String getName() {
@@ -48,20 +57,43 @@ public class Medicine {
         this.expiration = expiration;
     }
 
-    public String getRefillDate() {
-        return whenToRefill;
-    }
-
-    public void setRefillDate(String whenToRefill) {
-        this.whenToRefill = whenToRefill;
-    }
-
     public long getId() {
         return Id;
     }
 
     public void setId(long id) {
         Id = id;
+    }
+    public String getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(String quantity) {
+        this.quantity = quantity;
+    }
+
+    public String getRefills() {
+        return refills;
+    }
+
+    public void setRefills(String refills) {
+        this.refills = refills;
+    }
+
+    public String getDuration() {
+        return duration;
+    }
+
+    public void setDuration(String duration) {
+        this.duration = duration;
+    }
+
+    public String getInstructions() {
+        return instructions;
+    }
+
+    public void setInstructions(String instructions) {
+        this.instructions = instructions;
     }
 }
 
