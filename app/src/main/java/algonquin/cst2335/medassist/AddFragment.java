@@ -22,6 +22,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -32,7 +34,7 @@ import android.Manifest;
 import android.widget.Toast;
 import androidx.lifecycle.LifecycleOwner;
 
-public class AddFragment extends DialogFragment {
+public class AddFragment extends DialogFragment{
 
     AddFragmentBinding binding;
     private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
@@ -41,12 +43,16 @@ public class AddFragment extends DialogFragment {
     private static final int REQUEST_CAMERA_PERMISSION = 1;
 
 
-    private void refreshMedicineList() {
-        MedDatabase medDb = new MedDatabase(requireContext());
-        List<Medicine> medicineList = medDb.getAllMedicines();
-        MedicineAdapter adapter = new MedicineAdapter(medicineList);
-        RecyclerView recyclerView = requireActivity().findViewById(R.id.recyclerView);
-        recyclerView.setAdapter(adapter);
+//    private void refreshMedicineList() {
+//        MedDatabase medDb = new MedDatabase(requireContext());
+//        List<Medicine> medicineList = medDb.getAllMedicines();
+//        MedicineAdapter adapter = new MedicineAdapter(medicineList, this);
+//        RecyclerView recyclerView = requireActivity().findViewById(R.id.recyclerView);
+//        recyclerView.setAdapter(adapter);
+//    }
+    private void setMedicineAdapterInMainActivity() {
+        MainActivity mainActivity = (MainActivity) requireActivity();
+        mainActivity.setMedicineAdapter();
     }
 
     @Override
@@ -110,29 +116,51 @@ public class AddFragment extends DialogFragment {
             String duration = binding.editDuration.getText().toString();
             String expiration = binding.editExpiration.getText().toString();
             String instructions = binding.editInstructions.getText().toString();
-
+            if (instructions.isEmpty()){
+                instructions = "No special Instructions were specified";
+            }
             // Create a Medicine object with user input
             Medicine newMedicine = new Medicine(medName, dosage, quantity, frequency, refills, duration, expiration, instructions);
 
-            // Insert the new medicine into the database
-            MedDatabase medDb = new MedDatabase(requireContext());
-            long newRowId = medDb.insertMedicine(newMedicine);
+            if(isInputValid(medName, dosage, quantity, frequency, refills, duration, expiration, instructions) && isValidDate(duration) && isValidDate(expiration)) {
+                // Insert the new medicine into the database
+                MedDatabase medDb = new MedDatabase(requireContext());
+                long newRowId = medDb.insertMedicine(newMedicine);
 
-            if (newRowId != -1) {
-                // Successfully added the medicine to the database, refresh the RecyclerView
-                Toast.makeText(requireContext(), expiration + " is date you entered for expiration", Toast.LENGTH_SHORT).show();
-                refreshMedicineList();
-                // Close the AddFragment or update UI as needed
-                dismiss();
-            } else {
-                // Handle insertion failure
-                Toast.makeText(requireContext(), "Failed to add medicine. Please try again.", Toast.LENGTH_SHORT).show();
+                if (newRowId != -1) {
+                    // Successfully added the medicine to the database, refresh the RecyclerView
+                    //refreshMedicineList();
+                    setMedicineAdapterInMainActivity();
+                    // Close the AddFragment or update UI as needed
+                    dismiss();
+                } else {
+                    // Handle insertion failure
+                    Toast.makeText(requireContext(), "Failed to add medicine. Please try again.", Toast.LENGTH_LONG).show();
+                }
+            }else{
+                Toast.makeText(requireContext(), "Please fill out all the fields correctly. Use the format YYYY/MM/DD for duration and expiration.", Toast.LENGTH_LONG).show();
             }
         });
 
         return view;
     }
+    private boolean isInputValid(String medName, String dosage, String quantity, String frequency, String refills, String duration, String expiration, String instructions){
+        return !medName.isEmpty() && !dosage.isEmpty() && !quantity.isEmpty() && !frequency.isEmpty() && !refills.isEmpty() && !duration.isEmpty() && !expiration.isEmpty() && !instructions.isEmpty();
+    }
 
+    private boolean isValidDate(String date){
+        if(date.matches("\\d{4}/\\d{2}/\\d{2}")){
+            try{
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
+                sdf.setLenient(false);
+                sdf.parse(date);
+                return true;
+            } catch (ParseException e) {
+                return false;
+            }
+        }
+        return false;
+    }
     private boolean checkCameraPermissions() {
         return ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
     }
@@ -223,5 +251,4 @@ public class AddFragment extends DialogFragment {
             binding.textInstructions.setVisibility(View.VISIBLE);
         }
     }
-
 }
