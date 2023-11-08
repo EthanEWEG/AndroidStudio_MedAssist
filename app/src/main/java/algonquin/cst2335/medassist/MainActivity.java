@@ -7,6 +7,8 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 
 import java.time.LocalDate;
@@ -17,12 +19,13 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import algonquin.cst2335.medassist.databinding.MedViewBinding;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements RecyclerViewInterface{
 
     private boolean isAddFragmentVisible = false;
     private boolean isSearchFragmentVisible = false;
 
     MedViewBinding binding;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,9 +40,6 @@ public class MainActivity extends AppCompatActivity {
         MedDatabase medDb = new MedDatabase(this);
 
         //medDb.deleteMostRecentMedicine();
-//        List<Medicine> medicineList = medDb.getAllMedicines();
-//        AtomicReference<MedicineAdapter> adapter = new AtomicReference<>(new MedicineAdapter(medicineList));
-//        recyclerView.setAdapter(adapter.get());
 
         binding.current.setOnClickListener(click -> {
             //Hides past recycler view -> displays current recycler view
@@ -59,16 +59,16 @@ public class MainActivity extends AppCompatActivity {
 
             LocalDate currentDate = LocalDate.now();
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
-
-            for(Medicine medicine : medicineList){
-                String expirationDateString = medicine.getExpiration();
-                LocalDate expirationDate = LocalDate.parse(expirationDateString, formatter);
-
-                if(currentDate.isBefore(expirationDate)){
-                    currentMedList.add(medicine);
+            if(!medicineList.isEmpty()) {
+                for (Medicine medicine : medicineList) {
+                    String expirationDateString = medicine.getExpiration();
+                    LocalDate expirationDate = LocalDate.parse(expirationDateString, formatter);
+                    if (currentDate.isBefore(expirationDate)) {
+                        currentMedList.add(medicine);
+                    }
                 }
             }
-            AtomicReference<MedicineAdapter> adapter = new AtomicReference<>(new MedicineAdapter(currentMedList));
+            AtomicReference<MedicineAdapter> adapter = new AtomicReference<>(new MedicineAdapter(currentMedList, this));
             recyclerView.setAdapter(adapter.get());
 
         });
@@ -100,7 +100,7 @@ public class MainActivity extends AppCompatActivity {
                     currentMedList.add(medicine);
                 }
             }
-            AtomicReference<MedicineAdapter> adapter = new AtomicReference<>(new MedicineAdapter(currentMedList));
+            AtomicReference<MedicineAdapter> adapter = new AtomicReference<>(new MedicineAdapter(currentMedList, this));
             recyclerView.setAdapter(adapter.get());
         });
 
@@ -147,13 +147,24 @@ public class MainActivity extends AppCompatActivity {
 
         });
 
+    }
 
-//        MedDatabase medDb = new MedDatabase(this);
-//        medDb.deleteMostRecentMedicine();
-//        medDb.insertMedicine(new Medicine("Tylenol", "500mg", "2 times a day", "2023-10-10", "2023-10-11"));
-//        List<Medicine> medicineList = medDb.getAllMedicines();
-//        MedicineAdapter adapter = new MedicineAdapter(medicineList);
-//        recyclerView.setAdapter(adapter);
+    public void setMedicineAdapter() {
+        MedDatabase medDb = new MedDatabase(this);
+        List<Medicine> medicineList = medDb.getAllMedicines();
+        MedicineAdapter adapter = new MedicineAdapter(medicineList, this);
+        RecyclerView recyclerView = findViewById(R.id.recyclerView);
+        recyclerView.setAdapter(adapter);
+    }
 
+    @Override
+    public void onItemClick(int position) {
+        MedDatabase medDb = new MedDatabase(this);
+        List<Medicine> medList = medDb.getAllMedicines();
+        Medicine medicine = medList.get(position);
+
+        Intent intent = new Intent(this, MedicineDetailActivity.class);
+        intent.putExtra("medicine", medicine);
+        startActivity(intent);
     }
 }

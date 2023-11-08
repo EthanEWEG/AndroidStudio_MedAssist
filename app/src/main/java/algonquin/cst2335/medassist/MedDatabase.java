@@ -167,33 +167,6 @@ public class MedDatabase extends SQLiteOpenHelper {
         return count;
     }
 
-    public List<Medicine> getPastMedicines(int pastDurationInDays) {
-        SQLiteDatabase db = this.getReadableDatabase();
-        String query = "SELECT * FROM " + TABLE_MEDICINE + " WHERE strftime('%s', " + COLUMN_EXPIRATION + ") < strftime('%s', 'now') - ? * 24 * 60 * 60";
-        String[] selectionArgs = { String.valueOf(pastDurationInDays) };
-
-        Cursor cursor = db.rawQuery(query, selectionArgs);
-
-        List<Medicine> pastMedicines = new ArrayList<>();
-        if (cursor.moveToFirst()) {
-            do {
-                Medicine medicine = new Medicine();
-                medicine.setId(cursor.getInt(cursor.getColumnIndex(COLUMN_ID)));
-                medicine.setName(cursor.getString(cursor.getColumnIndex(COLUMN_NAME)));
-                medicine.setDosage(cursor.getString(cursor.getColumnIndex(COLUMN_DOSAGE)));
-                medicine.setFrequency(cursor.getString(cursor.getColumnIndex(COLUMN_FREQUENCY)));
-                medicine.setRefills(cursor.getString(cursor.getColumnIndex(COLUMN_REFILL)));
-                medicine.setExpiration(cursor.getString(cursor.getColumnIndex(COLUMN_EXPIRATION)));
-
-                pastMedicines.add(medicine);
-            } while (cursor.moveToNext());
-        }
-
-        cursor.close();
-        return pastMedicines;
-    }
-
-
     public void deleteMostRecentMedicine() {
         SQLiteDatabase db = this.getWritableDatabase();
 
