@@ -1,18 +1,16 @@
 package algonquin.cst2335.medassist;
 
-import android.content.Context;
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
-import androidx.camera.core.CameraSelector;
-import androidx.camera.core.ImageCapture;
-import androidx.camera.core.ImageCaptureException;
-import androidx.camera.core.ImageProxy;
-import androidx.camera.core.Preview;
+import androidx.annotation.Nullable;
 import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.view.PreviewView;
 import androidx.core.app.ActivityCompat;
@@ -30,7 +28,9 @@ import algonquin.cst2335.medassist.databinding.AddFragmentBinding;
 import android.content.pm.PackageManager;
 import android.Manifest;
 import android.widget.Toast;
-import androidx.lifecycle.LifecycleOwner;
+
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
 
 public class AddFragment extends DialogFragment {
 
@@ -55,23 +55,9 @@ public class AddFragment extends DialogFragment {
         binding = AddFragmentBinding.inflate(inflater, container, false);
         View view = (binding.getRoot());
 
-        cameraPreviewView = binding.cameraPreview; // Initialize the camera preview view
-
         cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext());
 
         binding.cameraButton.setOnClickListener(v -> {
-            // Permissions are granted, proceed with camera setup
-            closeKeyboard();
-
-            // Change the visibility of items to make visible/invisible
-            if (cameraPreviewView.getVisibility() == View.VISIBLE) {
-                cameraPreviewView.setVisibility(View.GONE);
-                binding.captureButton.setVisibility(View.GONE);
-                binding.submitButton.setVisibility(View.VISIBLE);
-
-                //show medical input items
-                inputElements(2);
-
                 //closes camera (or else itd stay open but hidden)
                 try {
                     ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
@@ -79,23 +65,13 @@ public class AddFragment extends DialogFragment {
                 } catch (ExecutionException | InterruptedException e) {
                     e.printStackTrace();
                 }
-            }
-            else {
-                cameraPreviewView.setVisibility(View.VISIBLE);
-                binding.captureButton.setVisibility(View.VISIBLE);
-                binding.submitButton.setVisibility(View.GONE);
 
-                //hide medical input items
-                inputElements(1);
-
-                if (cameraPreviewView.getVisibility() == View.VISIBLE) {
-                    if (checkCameraPermissions()) {
-                        startCamera();
-                    } else {
-                        requestCameraPermissions();
-                    }
+                if (checkCameraPermissions()) {
+                    startCamera();
+                } else {
+                    requestCameraPermissions();
                 }
-            }
+
         });
 
         //Submits info for med
@@ -141,87 +117,72 @@ public class AddFragment extends DialogFragment {
         ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA_PERMISSION);
     }
 
-    //Sets up the camera for its preview
+    //Starts up the camera for scanning
     private void startCamera() {
-        cameraProviderFuture.addListener(() -> {
-            try {
-                ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
+        IntentIntegrator intentIntegrator = new IntentIntegrator(getActivity());
+        intentIntegrator.setOrientationLocked(false);
+        intentIntegrator.setPrompt("Scan a QR Code");
+        intentIntegrator.setDesiredBarcodeFormats(IntentIntegrator.QR_CODE);
+        //intentIntegrator.initiateScan();
+        scanActivityResultLauncher.launch(intentIntegrator.createScanIntent());
+    }
 
-                // Bind the camera preview to the PreviewView
-                Preview preview = new Preview.Builder().build();
-                preview.setSurfaceProvider(cameraPreviewView.getSurfaceProvider());
+    private final ActivityResultLauncher<Intent> scanActivityResultLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == Activity.RESULT_OK) {
+                    IntentResult scanResult = IntentIntegrator.parseActivityResult(result.getResultCode(), result.getData());
+                    if (scanResult != null) {
+                        // Handles the scanned QR code data here
+                        String qrCodeData = scanResult.getContents();
 
-                // Sets up the image capture use case if needed
-                ImageCapture imageCapture = new ImageCapture.Builder()
-                        .setTargetRotation(requireActivity().getWindowManager().getDefaultDisplay().getRotation())
-                        .build();
+                        //Confirm QR read variable
+                        boolean readQRConfirm = false;
 
-                // Create a CameraSelector and select the desired camera (e.g., front or rear)
-                CameraSelector cameraSelector = new CameraSelector.Builder()
-                        .requireLensFacing(CameraSelector.LENS_FACING_BACK)
-                        .build();
+                        //QR code keys for each value
+                        //test qr entry : name=Advil.dosage=5.quantity=150.frequency=6 times a day max.refills=0.duration=2024/01/01.expiration=2026/01/01.instructions=Keep away from children
+                        //name=, dosage=, quantity=, frequency=, refills=, duration=, expiration=, instructions=
+                        String[] QRdata = qrCodeData.split("\\.");
+                        for (String data : QRdata) {
+                            if (data.startsWith("name=")) {
+                                binding.editMedName.setText(data.substring("name=".length()).trim());
+                                readQRConfirm = true;
+                            } else if (data.startsWith("dosage=")) {
+                                binding.editDosage.setText(data.substring("dosage=".length()).trim());
+                                readQRConfirm = true;
+                            } else if (data.startsWith("quantity=")) {
+                                binding.editQuantity.setText(data.substring("quantity=".length()).trim());
+                                readQRConfirm = true;
+                            } else if (data.startsWith("frequency=")) {
+                                binding.editFrequency.setText(data.substring("frequency=".length()).trim());
+                                readQRConfirm = true;
+                            } else if (data.startsWith("refills=")) {
+                                binding.editRefills.setText(data.substring("refills=".length()).trim());
+                                readQRConfirm = true;
+                            } else if (data.startsWith("duration=")) {
+                                binding.editDuration.setText(data.substring("duration=".length()).trim());
+                                readQRConfirm = true;
+                            } else if (data.startsWith("expiration=")) {
+                                binding.editExpiration.setText(data.substring("expiration=".length()).trim());
+                                readQRConfirm = true;
+                            } else if (data.startsWith("instructions=")) {
+                                binding.editInstructions.setText(data.substring("instructions=".length()).trim());
+                                readQRConfirm = true;
+                            }
+                        }
 
-                // Attach the use cases to the camera
-                cameraProvider.unbindAll();
-                cameraProvider.bindToLifecycle((LifecycleOwner) requireActivity(), cameraSelector, preview, imageCapture);
+                        if(readQRConfirm == true){
+                            Toast toast = Toast.makeText(this.getActivity(),"QR Read Successful", Toast.LENGTH_SHORT);
+                            toast.show();
+                        }
+                        else{
+                            Toast toast = Toast.makeText(this.getActivity(),"QR Read Failed", Toast.LENGTH_SHORT);
+                            toast.show();
+                        }
 
-
-
-            } catch (ExecutionException | InterruptedException e) {
-                e.printStackTrace();
+                    }
+                }
             }
-        }, ContextCompat.getMainExecutor(requireContext()));
-    }
-
-    //closeKeyboard() method to close the keyboard when clicking cameraPreview button
-    private void closeKeyboard() {
-        View currentFocusView = requireActivity().getCurrentFocus();
-        if (currentFocusView != null) {
-            currentFocusView.clearFocus();
-            InputMethodManager imm = (InputMethodManager) requireContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(currentFocusView.getWindowToken(), 0);
-        }
-    }
-
-    private void inputElements(int i) {
-        if (i == 1) {
-            binding.editMedName.setVisibility(View.GONE);
-            binding.textMedName.setVisibility(View.GONE);
-            binding.editDosage.setVisibility(View.GONE);
-            binding.textDosage.setVisibility(View.GONE);
-            binding.dosageUnit.setVisibility(View.GONE);
-            binding.editQuantity.setVisibility(View.GONE);
-            binding.textQuantity.setVisibility(View.GONE);
-            binding.editFrequency.setVisibility(View.GONE);
-            binding.textFrequency.setVisibility(View.GONE);
-            binding.editRefills.setVisibility(View.GONE);
-            binding.textRefill.setVisibility(View.GONE);
-            binding.editDuration.setVisibility(View.GONE);
-            binding.textDuration.setVisibility(View.GONE);
-            binding.editExpiration.setVisibility(View.GONE);
-            binding.textExpiration.setVisibility(View.GONE);
-            binding.editInstructions.setVisibility(View.GONE);
-            binding.textInstructions.setVisibility(View.GONE);
-        }
-        else {
-            binding.editMedName.setVisibility(View.VISIBLE);
-            binding.textMedName.setVisibility(View.VISIBLE);
-            binding.editDosage.setVisibility(View.VISIBLE);
-            binding.textDosage.setVisibility(View.VISIBLE);
-            binding.dosageUnit.setVisibility(View.VISIBLE);
-            binding.editQuantity.setVisibility(View.VISIBLE);
-            binding.textQuantity.setVisibility(View.VISIBLE);
-            binding.editFrequency.setVisibility(View.VISIBLE);
-            binding.textFrequency.setVisibility(View.VISIBLE);
-            binding.editRefills.setVisibility(View.VISIBLE);
-            binding.textRefill.setVisibility(View.VISIBLE);
-            binding.editDuration.setVisibility(View.VISIBLE);
-            binding.textDuration.setVisibility(View.VISIBLE);
-            binding.editExpiration.setVisibility(View.VISIBLE);
-            binding.textExpiration.setVisibility(View.VISIBLE);
-            binding.editInstructions.setVisibility(View.VISIBLE);
-            binding.textInstructions.setVisibility(View.VISIBLE);
-        }
-    }
+    );
 
 }
