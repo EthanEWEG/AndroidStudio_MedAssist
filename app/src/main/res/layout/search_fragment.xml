@@ -21,6 +21,7 @@
         android:layout_height="wrap_content"
         android:text="Search for medications :"
         android:layout_marginTop="12dp"
+        android:textColor="@color/black"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
@@ -31,6 +32,8 @@
         android:layout_height="wrap_content"
         android:ems="10"
         android:inputType="text"
+        android:textColor="@color/black"
+        android:backgroundTint="@color/black"
         app:layout_constraintTop_toBottomOf="@id/searchMedTitle"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />

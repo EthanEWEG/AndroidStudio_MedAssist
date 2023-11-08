@@ -152,7 +152,6 @@ public class AddFragment extends DialogFragment{
         intentIntegrator.setOrientationLocked(false);
         intentIntegrator.setPrompt("Scan a QR Code");
         intentIntegrator.setDesiredBarcodeFormats(IntentIntegrator.QR_CODE);
-        //intentIntegrator.initiateScan();
         scanActivityResultLauncher.launch(intentIntegrator.createScanIntent());
     }
 
@@ -200,7 +199,7 @@ public class AddFragment extends DialogFragment{
                             }
                         }
 
-                        if(readQRConfirm == true){
+                        if(readQRConfirm){
                             Toast toast = Toast.makeText(this.getActivity(),"QR Read Successful", Toast.LENGTH_SHORT);
                             toast.show();
                         }
