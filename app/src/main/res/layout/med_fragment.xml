@@ -38,7 +38,7 @@
         android:layout_height="wrap_content"
         android:text="Dosage_Amt"
         android:textStyle="bold"
-        android:layout_marginStart="5dp"
+        android:layout_marginStart="8dp"
         android:textSize="20sp"
         app:layout_constraintStart_toEndOf="@id/medDosageTitle"
         app:layout_constraintTop_toTopOf="@id/medDosageTitle" />
@@ -59,7 +59,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/textQuantity"
-        android:layout_marginTop="15dp"
+        android:layout_marginTop="8dp"
         android:layout_marginStart="50dp"
         android:textSize="20sp"
         app:layout_constraintStart_toStartOf="parent"
@@ -82,7 +82,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/textFrequency"
-        android:layout_marginTop="15dp"
+        android:layout_marginTop="8dp"
         android:layout_marginStart="50dp"
         android:textSize="20sp"
         app:layout_constraintStart_toStartOf="parent"
@@ -105,7 +105,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/textRefill"
-        android:layout_marginTop="15dp"
+        android:layout_marginTop="8dp"
         android:layout_marginStart="50dp"
         android:textSize="20sp"
         app:layout_constraintStart_toStartOf="parent"
@@ -128,7 +128,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/textDuration"
-        android:layout_marginTop="15dp"
+        android:layout_marginTop="8dp"
         android:layout_marginStart="50dp"
         android:textSize="20sp"
         app:layout_constraintStart_toStartOf="parent"
@@ -151,7 +151,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/textExpiration"
-        android:layout_marginTop="15dp"
+        android:layout_marginTop="8dp"
         android:layout_marginStart="50dp"
         android:textSize="20sp"
         app:layout_constraintStart_toStartOf="parent"
@@ -170,15 +170,61 @@
 
 
     <TextView
-        android:id="@+id/medInstructionsTitle"
+        android:id="@+id/medDocNameTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/textInstructions"
-        android:layout_marginTop="15dp"
+        android:text="@string/textDocName"
+        android:layout_marginTop="8dp"
         android:layout_marginStart="50dp"
         android:textSize="20sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/medExpirationTitle" />
+    <TextView
+        android:id="@+id/medDocNameValue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Doc_Name"
+        android:textStyle="bold"
+        android:layout_marginStart="5dp"
+        android:textSize="20sp"
+        app:layout_constraintStart_toEndOf="@id/medDocNameTitle"
+        app:layout_constraintTop_toTopOf="@id/medDocNameTitle" />
+
+
+
+    <TextView
+        android:id="@+id/medDocNumberTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/textDocNumber"
+        android:layout_marginTop="8dp"
+        android:layout_marginStart="50dp"
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/medDocNameTitle" />
+    <TextView
+        android:id="@+id/medDocNumberValue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Doc_Number"
+        android:textStyle="bold"
+        android:layout_marginStart="5dp"
+        android:textSize="20sp"
+        app:layout_constraintStart_toEndOf="@id/medDocNumberTitle"
+        app:layout_constraintTop_toTopOf="@id/medDocNumberTitle" />
+
+
+
+    <TextView
+        android:id="@+id/medInstructionsTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/textInstructions"
+        android:layout_marginTop="8dp"
+        android:layout_marginStart="50dp"
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/medDocNumberTitle" />
     <TextView
         android:id="@+id/medInstructionsValue"
         android:layout_width="wrap_content"
@@ -189,7 +235,7 @@
         android:layout_marginTop="5dp"
         android:textSize="20sp"
         android:breakStrategy="simple"
-        android:lines="8"
+        android:lines="7"
         android:paddingEnd="60dp"
         app:layout_constraintStart_toStartOf="@id/medInstructionsTitle"
         app:layout_constraintTop_toBottomOf="@id/medInstructionsTitle" />

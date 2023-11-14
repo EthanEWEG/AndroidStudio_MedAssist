@@ -15,6 +15,11 @@
     <string name="textQR">Scan QR Code</string>
     <string name="textQuantity">Quantity:</string>
     <string name="dosageUnit">mg/mL</string>
-    <string name="capture">capture</string>
+    <string name="textDocName">Doctors Name:</string>
+    <string name="textDocNumber">Doctors Number:</string>
     <string name="submit">submit</string>
+    <string name="sort">Sort by:</string>
+    <string name="sortName">name</string>
+    <string name="sortFrequency">freq</string>
+    <string name="sortDateAdded">added</string>
 </resources>

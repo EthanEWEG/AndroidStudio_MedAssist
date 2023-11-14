@@ -1,5 +1,6 @@
 package algonquin.cst2335.medassist;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -7,9 +8,14 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Typeface;
 import android.os.Bundle;
+import android.view.Gravity;
+import android.widget.TextView;
+import android.view.View;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -25,7 +31,6 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
     private boolean isSearchFragmentVisible = false;
 
     MedViewBinding binding;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -141,9 +146,11 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
 
         });
 
+
+
         binding.settings.setOnClickListener(click -> {
 
-            //open settings dialogue box
+            //open settings dialog box
 
         });
 
@@ -166,5 +173,39 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
         Intent intent = new Intent(this, MedicineDetailActivity.class);
         intent.putExtra("medicine", medicine);
         startActivity(intent);
+    }
+
+    public void calendar(View view) {
+
+        //dialog box for Alerts
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+
+        //Creates a custom TextView for the title
+        TextView title = new TextView(MainActivity.this);
+        title.setText("Set Medication Alerts");
+        title.setTextSize(20); //Adjusts the text size
+        title.setTypeface(null, Typeface.BOLD); //Makes the text bold
+        title.setGravity(Gravity.CENTER); //Aligns the text
+        title.setPadding(0, 25, 0, 25); //Adds top and bottom padding
+        builder.setCustomTitle(title);
+
+        // Set up the message text alignment
+        TextView message = new TextView(MainActivity.this);
+        message.setText("Your message here");
+        message.setGravity(Gravity.CENTER); // Center align the message
+        builder.setView(message);
+
+        // Set up buttons and their alignment
+        builder.setPositiveButton("Save", (dialog, which) -> {
+            // Handle Save button click
+        });
+
+        builder.setNegativeButton("Cancel", (dialog, which) -> {
+            // Handle Cancel button click
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
     }
 }

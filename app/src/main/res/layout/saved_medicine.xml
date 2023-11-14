@@ -88,4 +88,15 @@
         app:layout_constraintStart_toEndOf="@id/quantityTitle"
         app:layout_constraintTop_toTopOf="@id/quantityTitle" />
 
+    <ImageButton
+        android:id="@+id/calendarIcon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/calendar"
+        android:backgroundTint="@color/white"
+        android:onClick="calendar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
