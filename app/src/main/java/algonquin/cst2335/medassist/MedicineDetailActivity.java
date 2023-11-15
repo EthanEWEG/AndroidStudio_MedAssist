@@ -1,7 +1,6 @@
 package algonquin.cst2335.medassist;
 
 import android.os.Bundle;
-import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -18,6 +17,7 @@ public class MedicineDetailActivity extends AppCompatActivity {
 
         // Retrieve the selected medicine from the intent
         Medicine medicine = getIntent().getParcelableExtra("medicine");
+        Doctor doctor = getIntent().getParcelableExtra("doctor");
 
         if (medicine != null) {
             // Display the detailed information in your layout using the binding object
@@ -28,6 +28,8 @@ public class MedicineDetailActivity extends AppCompatActivity {
             binding.medRefillValue.setText(medicine.getRefills());
             binding.medDurationValue.setText(medicine.getDuration());
             binding.medExpirationValue.setText(medicine.getExpiration());
+            binding.medDocNameValue.setText(doctor.getDocName());
+            binding.medDocNumberValue.setText(doctor.getDocNumber());
             binding.medInstructionsValue.setText(medicine.getInstructions());
         }
     }

@@ -9,6 +9,10 @@ import android.database.sqlite.SQLiteOpenHelper;
 import java.util.ArrayList;
 import java.util.List;
 
+//TODO
+/**
+ * Add table for Doctor + information (Phone number)
+ */
 public class MedDatabase extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "medicine_db";
     private static final int DATABASE_VERSION = 1;
@@ -35,6 +39,12 @@ public class MedDatabase extends SQLiteOpenHelper {
     private static final String COLUMN_DURATION = "duration";
     private static final String COLUMN_EXPIRATION = "expiration";
     private static final String COLUMN_INSTRUCTIONS = "instructions";
+
+
+    private static final String TABLE_DOCTOR = "doctor";
+    private static final String COLUMN_DOC_ID = "doc_id";
+    private static final String COLUMN_DOCNAME = "doc_name";
+    private static final String COLUMN_DOCNUM = "doc_phone";
 
 
     public MedDatabase(Context context) {
@@ -64,6 +74,13 @@ public class MedDatabase extends SQLiteOpenHelper {
                 COLUMN_PASSCODE + " TEXT" +
                 ")";
         db.execSQL(createUserTableSQL);
+
+        String createDoctorTableSQL = "CREATE TABLE " + TABLE_DOCTOR + " (" +
+                COLUMN_DOC_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+                COLUMN_DOCNAME + " TEXT," +
+                COLUMN_DOCNUM + " TEXT" +
+                ")";
+        db.execSQL(createDoctorTableSQL);
     }
 
     @Override
@@ -71,7 +88,11 @@ public class MedDatabase extends SQLiteOpenHelper {
         // Handle database schema upgrades, if needed
     }
 
-    // Method to insert a MedicineDTO object into the database
+    /**
+     * Inserts medicine information into database
+     * @param medicine
+     * @return ID - ID of medicine information
+     */
     public long insertMedicine(Medicine medicine) {
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -91,6 +112,13 @@ public class MedDatabase extends SQLiteOpenHelper {
         return newRowId;
     }
 
+    /**
+     * Inserts user login information into database
+     * @param username - username of user
+     * @param password - password of user
+     * @param passcode - numerical passcode to recover account information
+     * @return ID - User login information
+     */
     public long insertUser(String username, String password, String passcode) {
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -105,9 +133,56 @@ public class MedDatabase extends SQLiteOpenHelper {
         return newRowId;
     }
 
+    /**
+     * Insert Doctor's information (name and number)
+     * @param doctor - The doctors name and phone number
+     * @return The ID of the doctors information
+     */
+    public long insertDoc(Doctor doctor){
+        SQLiteDatabase db = this.getWritableDatabase();
 
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_DOCNAME, doctor.getDocName());
+        values.put(COLUMN_DOCNUM, doctor.getDocNumber());
 
-    // Method to retrieve all Medicine objects from the database
+        long newRowId = db.insert(TABLE_DOCTOR, null, values);
+        db.close();
+
+        return newRowId;
+    }
+
+    /**
+     * Obtains the list of doctors
+     * @return The list of doctors
+     */
+    public List<Doctor> getAllDoctor(){
+        List<Doctor> doctorList = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String[] projection = {
+                COLUMN_DOC_ID, COLUMN_DOCNAME, COLUMN_DOCNUM
+        };
+
+        Cursor cursor = db.query(TABLE_DOCTOR, projection, null, null, null, null, null);
+
+        while(cursor.moveToNext()){
+            long id = cursor.getLong(cursor.getColumnIndex(COLUMN_DOC_ID));
+            String name = cursor.getString(cursor.getColumnIndex(COLUMN_DOCNAME));
+            String docNumber = cursor.getString(cursor.getColumnIndex(COLUMN_DOCNUM));
+
+            Doctor doctor = new Doctor(name, docNumber);
+            doctor.setDocID(id);
+            doctorList.add(doctor);
+        }
+        cursor.close();
+        db.close();
+
+        return doctorList;
+    }
+    /**
+     * Retrieves all medicine information in database
+     * @return
+     */
     public List<Medicine> getAllMedicines() {
         List<Medicine> medicineList = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
@@ -145,6 +220,13 @@ public class MedDatabase extends SQLiteOpenHelper {
     }
 
     // Method to update a MedicineDTO object in the database
+
+    /**
+     * Edits the medicine information
+     * @param id - The ID of the medicine being updated
+     * @param medicine - The name of the medicine being updated
+     * @return - The udpated medicine information in database
+     */
     public int updateMedicine(long id, Medicine medicine) {
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -167,6 +249,9 @@ public class MedDatabase extends SQLiteOpenHelper {
         return count;
     }
 
+    /**
+     * Deletes the most recent medicine entered into database
+     */
     public void deleteMostRecentMedicine() {
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -186,6 +271,13 @@ public class MedDatabase extends SQLiteOpenHelper {
         }
     }
 
+    /**
+     * Method to check if user exists in the database before being granted access
+     * @param username - username entered from the user
+     * @param password - password entered from the user
+     * @return - true if the user info matches a database record. False if either user or pass does
+     *           not match a record in the database.
+     */
     public boolean checkUser(String username, String password) {
         SQLiteDatabase db = this.getReadableDatabase();
         String[] projection = {COLUMN_USER_ID, COLUMN_USERNAME, COLUMN_PASSWORD};

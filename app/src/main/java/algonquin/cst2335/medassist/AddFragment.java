@@ -81,7 +81,13 @@ public class AddFragment extends DialogFragment{
 
         });
 
-        //Submits info for med
+        /**
+         * notification for medication and prescription
+         */
+
+        /**
+         * Submits information for medicine
+         */
         binding.submitButton.setOnClickListener(click ->
         {
             // Retrieve user input for Medicine Name, Dosage, Quantity, Frequency, Refills, Duration, Expiration date, and special instructions
@@ -92,19 +98,27 @@ public class AddFragment extends DialogFragment{
             String refills = binding.editRefills.getText().toString();
             String duration = binding.editDuration.getText().toString();
             String expiration = binding.editExpiration.getText().toString();
+            String docName = binding.editDocName.getText().toString();
+            String docNumber = binding.editDocNumber.getText().toString();
             String instructions = binding.editInstructions.getText().toString();
             if (instructions.isEmpty()){
                 instructions = "No special Instructions were specified";
             }
             // Create a Medicine object with user input
             Medicine newMedicine = new Medicine(medName, dosage, quantity, frequency, refills, duration, expiration, instructions);
-
-            if(isInputValid(medName, dosage, quantity, frequency, refills, duration, expiration, instructions) && isValidDate(duration) && isValidDate(expiration)) {
+            Doctor newDoc = new Doctor(docName, docNumber);
+            //TODO
+            /**
+             * Perform individual alerts for each text field
+             */
+            if(isInputValid(medName, dosage, quantity, frequency, refills, duration, expiration, instructions, docName, docNumber) && isValidDate(duration) && isValidDate(expiration)) {
                 // Insert the new medicine into the database
                 MedDatabase medDb = new MedDatabase(requireContext());
-                long newRowId = medDb.insertMedicine(newMedicine);
 
-                if (newRowId != -1) {
+                long newRowId = medDb.insertMedicine(newMedicine);
+                long newDocId = medDb.insertDoc(newDoc);
+
+                if (newRowId != -1 || newDocId != -1) {
                     // Successfully added the medicine to the database, refresh the RecyclerView
                     //refreshMedicineList();
                     setMedicineAdapterInMainActivity();
@@ -115,14 +129,60 @@ public class AddFragment extends DialogFragment{
                     Toast.makeText(requireContext(), "Failed to add medicine. Please try again.", Toast.LENGTH_LONG).show();
                 }
             }else{
-                Toast.makeText(requireContext(), "Please fill out all the fields correctly. Use the format YYYY/MM/DD for duration and expiration.", Toast.LENGTH_LONG).show();
+                Toast.makeText(requireContext(), "Double check all fields have been entered correctly. Use the format YYYY/MM/DD for duration and expiration.", Toast.LENGTH_LONG).show();
             }
+
+
         });
 
         return view;
     }
-    private boolean isInputValid(String medName, String dosage, String quantity, String frequency, String refills, String duration, String expiration, String instructions){
-        return !medName.isEmpty() && !dosage.isEmpty() && !quantity.isEmpty() && !frequency.isEmpty() && !refills.isEmpty() && !duration.isEmpty() && !expiration.isEmpty() && !instructions.isEmpty();
+    private boolean isInputValid(String medName, String dosage, String quantity, String frequency, String refills, String duration, String expiration, String instructions, String docName, String docNumber){
+//        return !medName.isEmpty() && !dosage.isEmpty() && !quantity.isEmpty() && !frequency.isEmpty() && !refills.isEmpty() && !duration.isEmpty() && !expiration.isEmpty() && !instructions.isEmpty();
+        String[] fields = {"Medication Name", "Dosage", "Quantity", "Frequency", "Refills", "Duration", "Expiration","Doctor Name", "Doctor Number"};
+        int empFieldCount = 0;
+
+        for(int i = 0; i < fields.length;i++){
+            String value = getValueByIndex(i, medName, dosage, quantity, frequency, refills, duration, expiration, instructions, docName, docNumber);
+
+            if (value.isEmpty()) {
+                Toast.makeText(requireContext(), "Please enter " + fields[i], Toast.LENGTH_LONG).show();
+                empFieldCount++;
+            }
+
+            if (empFieldCount > 0) {
+                Toast.makeText(requireContext(), "Please fill in all the required fields", Toast.LENGTH_LONG).show();
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private String getValueByIndex(int index, String medName, String dosage, String quantity, String frequency, String refills, String duration, String expiration, String instructions, String docName, String docNumber) {
+        switch (index) {
+            case 0:
+                return medName;
+            case 1:
+                return dosage;
+            case 2:
+                return quantity;
+            case 3:
+                return frequency;
+            case 4:
+                return refills;
+            case 5:
+                return duration;
+            case 6:
+                return expiration;
+            case 7:
+                return instructions;
+            case 8:
+                return docName;
+            case 9:
+                return docNumber;
+            default:
+                return "";
+        }
     }
 
     private boolean isValidDate(String date){
