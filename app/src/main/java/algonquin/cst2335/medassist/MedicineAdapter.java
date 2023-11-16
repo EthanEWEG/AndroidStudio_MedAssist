@@ -80,4 +80,10 @@ public class MedicineAdapter extends RecyclerView.Adapter<MedicineAdapter.Medici
     public List<Medicine> getMedicineList() {
         return medicineList;
     }
+    public void removeMedicine(int position) {
+        if (position >= 0 && position < medicineList.size()) {
+            medicineList.remove(position);
+            notifyItemRemoved(position);
+        }
+    }
 }

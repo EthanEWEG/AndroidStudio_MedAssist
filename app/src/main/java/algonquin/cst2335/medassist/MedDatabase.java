@@ -252,23 +252,14 @@ public class MedDatabase extends SQLiteOpenHelper {
     /**
      * Deletes the most recent medicine entered into database
      */
-    public void deleteMostRecentMedicine() {
+    public void deleteMedicine(Medicine medicine) {
         SQLiteDatabase db = this.getWritableDatabase();
 
-        String query = "SELECT MAX(" + COLUMN_ID + ") FROM " + TABLE_MEDICINE;
-        Cursor cursor = db.rawQuery(query, null);
+        String selection = COLUMN_ID + " = ?";
+        String[] selectionArgs = {String.valueOf(medicine.getId())};
 
-        if (cursor != null && cursor.moveToFirst()) {
-            long maxTimestamp = cursor.getLong(0); // Get the most recent timestamp
-            cursor.close();
-
-            // Define a condition to identify the most recent entry
-            String selection = COLUMN_ID + " = ?";
-            String[] selectionArgs = { String.valueOf(maxTimestamp) };
-
-            // Delete the most recent entry
-            db.delete(TABLE_MEDICINE, selection, selectionArgs);
-        }
+        db.delete(TABLE_MEDICINE, selection, selectionArgs);
+        db.close();
     }
 
     /**

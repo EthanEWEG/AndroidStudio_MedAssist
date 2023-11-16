@@ -29,20 +29,19 @@ import android.widget.TimePicker;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import algonquin.cst2335.medassist.databinding.MedViewBinding;
 
-/**
- * Work on user registration asap...
- */
 public class MainActivity extends AppCompatActivity implements RecyclerViewInterface{
 
     private boolean isAddFragmentVisible = false;
     private boolean isSearchFragmentVisible = false;
-
     MedViewBinding binding;
+    private SortCriteria currentSortCriteria = SortCriteria.ADDED;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -179,6 +178,59 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
 
         });
 
+        /**
+         * On Click Listener Sort Alphabet
+         */
+        binding.sortAlphabetic.setOnClickListener(click ->{
+            currentSortCriteria = SortCriteria.NAME;
+            sortAndSetAdapter();
+        });
+
+        /**
+         * On Click Listener Sort Frequency
+         */
+        binding.sortFrequency.setOnClickListener(click -> {
+            currentSortCriteria = SortCriteria.FREQUENCY;
+            sortAndSetAdapter();
+        });
+
+        /**
+         * On Click Listener Sort Added
+         */
+        binding.sortDateAdded.setOnClickListener(click -> {
+            currentSortCriteria = SortCriteria.ADDED;
+            sortAndSetAdapter();
+        });
+
+    }
+
+    private void sortAndSetAdapter() {
+        MedDatabase medDb = new MedDatabase(this);
+        List<Medicine> medicineList = medDb.getAllMedicines();
+
+        switch (currentSortCriteria) {
+            case NAME:
+                Collections.sort(medicineList, Comparator.comparing(Medicine::getName));
+                break;
+            case FREQUENCY:
+                Collections.sort(medicineList, Comparator.comparingInt(medicine -> {
+                    try {
+                        return Integer.parseInt(medicine.getFrequency());
+                    } catch (NumberFormatException e) {
+                        return 0;
+                    }
+                }));
+                break;
+            case ADDED:
+                // Assuming Medicine class has a timestamp field for added time
+                //Collections.sort(medicineList, Comparator.comparing(Medicine::getAddedTimestamp).reversed());
+                Collections.sort(medicineList, Comparator.comparingLong(Medicine::getId));
+                break;
+        }
+
+        MedicineAdapter adapter = new MedicineAdapter(medicineList, this);
+        RecyclerView recyclerView = findViewById(R.id.recyclerView);
+        recyclerView.setAdapter(adapter);
     }
 
     /**
@@ -199,25 +251,23 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
      */
     @Override
     public void onItemClick(int position, View clickedView) {
-        if(clickedView.getId() == R.id.calendarIcon){
-            calendar(clickedView);
-        }
-        else{
-            MedDatabase medDb = new MedDatabase(this);
-            List<Medicine> medList = medDb.getAllMedicines();
-            Medicine medicine = medList.get(position);
-            List<Doctor> docList = medDb.getAllDoctor();
-            Doctor doctor = docList.get(position);
 
-            //TODO
-            /**
-             * Create function to filter current and past MEDICINE
-             */
-            Intent intent = new Intent(this, MedicineDetailActivity.class);
-            intent.putExtra("medicine", medicine);
-            intent.putExtra("doctor", doctor);
-            startActivity(intent);
-        }
+        MedDatabase medDb = new MedDatabase(this);
+        List<Medicine> medList = medDb.getAllMedicines();
+        Medicine medicine = medList.get(position);
+        List<Doctor> docList = medDb.getAllDoctor();
+        Doctor doctor = docList.get(position);
+
+        //TODO
+        /**
+         * Create function to filter current and past MEDICINE
+         */
+        Intent intent = new Intent(this, MedicineDetailActivity.class);
+        intent.putExtra("medicine", medicine);
+        intent.putExtra("doctor", doctor);
+        intent.putExtra("position", position);
+        startActivity(intent);
+//        startActivityForResult(intent, MEDICINE_DETAIL_REQUEST_CODE);
 
     }
 
