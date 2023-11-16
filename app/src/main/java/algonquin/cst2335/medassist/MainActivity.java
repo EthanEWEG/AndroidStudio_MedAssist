@@ -34,6 +34,9 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import algonquin.cst2335.medassist.databinding.MedViewBinding;
 
+/**
+ * Work on user registration asap...
+ */
 public class MainActivity extends AppCompatActivity implements RecyclerViewInterface{
 
     private boolean isAddFragmentVisible = false;
@@ -195,21 +198,27 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
      * @param position
      */
     @Override
-    public void onItemClick(int position) {
-        MedDatabase medDb = new MedDatabase(this);
-        List<Medicine> medList = medDb.getAllMedicines();
-        Medicine medicine = medList.get(position);
-        List<Doctor> docList = medDb.getAllDoctor();
-        Doctor doctor = docList.get(position);
+    public void onItemClick(int position, View clickedView) {
+        if(clickedView.getId() == R.id.calendarIcon){
+            calendar(clickedView);
+        }
+        else{
+            MedDatabase medDb = new MedDatabase(this);
+            List<Medicine> medList = medDb.getAllMedicines();
+            Medicine medicine = medList.get(position);
+            List<Doctor> docList = medDb.getAllDoctor();
+            Doctor doctor = docList.get(position);
 
-        //TODO
-        /**
-         * Create function to filter current and past MEDICINE
-         */
-        Intent intent = new Intent(this, MedicineDetailActivity.class);
-        intent.putExtra("medicine", medicine);
-        intent.putExtra("doctor", doctor);
-        startActivity(intent);
+            //TODO
+            /**
+             * Create function to filter current and past MEDICINE
+             */
+            Intent intent = new Intent(this, MedicineDetailActivity.class);
+            intent.putExtra("medicine", medicine);
+            intent.putExtra("doctor", doctor);
+            startActivity(intent);
+        }
+
     }
 
     public void calendar(View view) {

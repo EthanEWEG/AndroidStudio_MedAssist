@@ -9,6 +9,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import algonquin.cst2335.medassist.databinding.MedFragmentBinding;
 import algonquin.cst2335.medassist.databinding.RegistrationBinding;
 
 public class RegistrationActivity extends AppCompatActivity {
@@ -18,7 +19,10 @@ public class RegistrationActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.registration);
+        binding = RegistrationBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+
+        registerButton = binding.registerButton;
 
         registerButton.setOnClickListener(new View.OnClickListener() {
             @Override

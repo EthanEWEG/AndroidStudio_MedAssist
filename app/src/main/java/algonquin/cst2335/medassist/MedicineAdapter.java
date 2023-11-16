@@ -67,7 +67,8 @@ public class MedicineAdapter extends RecyclerView.Adapter<MedicineAdapter.Medici
                     if(recyclerViewInterface != null){
                         int position = getAdapterPosition();
                         if(position != RecyclerView.NO_POSITION){
-                            recyclerViewInterface.onItemClick(position);
+                            //recyclerViewInterface.onItemClick(position);
+                            recyclerViewInterface.onItemClick(position, v);
                         }
                     }
                 }

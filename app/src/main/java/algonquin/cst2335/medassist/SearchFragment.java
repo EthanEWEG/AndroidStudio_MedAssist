@@ -7,18 +7,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 
-import androidx.annotation.NonNull;
 import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
-
-import algonquin.cst2335.medassist.databinding.AddFragmentBinding;
-import algonquin.cst2335.medassist.databinding.SearchFragmentBinding;
 
 public class SearchFragment extends DialogFragment implements RecyclerViewInterface {
 
@@ -78,7 +72,7 @@ public class SearchFragment extends DialogFragment implements RecyclerViewInterf
     }
 
     @Override
-    public void onItemClick(int position) {
+    public void onItemClick(int position, View v) {
         MedDatabase medDb = new MedDatabase(requireContext());
         List<Medicine> medList = medDb.getAllMedicines();
         Medicine medicine = medList.get(position);
