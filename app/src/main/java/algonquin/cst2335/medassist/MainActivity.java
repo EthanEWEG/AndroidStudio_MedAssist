@@ -19,6 +19,7 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 import android.transition.TransitionManager;
 import android.util.Log;
+import android.text.InputType;
 import android.view.Gravity;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -29,6 +30,13 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.Spinner;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.NumberPicker;
+import android.widget.ScrollView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.view.View;
 import android.widget.TimePicker;
@@ -37,6 +45,8 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
@@ -50,6 +60,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
     private boolean isSearchFragmentVisible = false;
 
     MedViewBinding binding;
+    private SortCriteria currentSortCriteria = SortCriteria.ADDED;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,8 +74,9 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
         recyclerView.setLayoutManager(layoutManager);
         MedDatabase medDb = new MedDatabase(this);
 
-        //medDb.deleteMostRecentMedicine();
-
+        /**
+         * On Click Listener Current Tab
+         */
         binding.current.setOnClickListener(click -> {
             //Hides past recycler view -> displays current recycler view
             //Removes the current fragment (if any)
@@ -86,8 +98,10 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
             if(!medicineList.isEmpty()) {
                 for (Medicine medicine : medicineList) {
                     String expirationDateString = medicine.getExpiration();
+                    String durationDateString = medicine.getDuration();
                     LocalDate expirationDate = LocalDate.parse(expirationDateString, formatter);
-                    if (currentDate.isBefore(expirationDate)) {
+                    LocalDate durationDate = LocalDate.parse(durationDateString, formatter);
+                    if (currentDate.isBefore(expirationDate) || currentDate.isBefore(durationDate)) {
                         currentMedList.add(medicine);
                     }
                 }
@@ -98,6 +112,9 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
         });
         binding.current.performClick();
 
+        /**
+         * On Click Listener Past Tab
+         */
         binding.past.setOnClickListener(click -> {
             //Hides current recycler view -> displays past recycler view
             //Removes the current fragment (if any)
@@ -119,9 +136,10 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
 
             for(Medicine medicine : medicineList){
                 String expirationDateString = medicine.getExpiration();
+                String durationDateString = medicine.getDuration();
                 LocalDate expirationDate = LocalDate.parse(expirationDateString, formatter);
-
-                if(currentDate.isAfter(expirationDate)){
+                LocalDate durationDate = LocalDate.parse(durationDateString, formatter);
+                if(currentDate.isAfter(expirationDate) || currentDate.isAfter(durationDate)){
                     currentMedList.add(medicine);
                 }
             }
@@ -129,6 +147,9 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
             recyclerView.setAdapter(adapter.get());
         });
 
+        /**
+         * On Click Listener Add Tab
+         */
         binding.add.setOnClickListener(click -> {
 
             //resets searchFragment flag
@@ -147,7 +168,9 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
 
         });
 
-
+        /**
+         * On Click Listener Search Tab
+         */
         binding.search.setOnClickListener(click -> {
 
             //resets addFragment flag
@@ -166,16 +189,73 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
 
         });
 
-
-
+        /**
+         * On Click Listener Settings Tab
+         */
         binding.settings.setOnClickListener(click -> {
 
             //open settings dialog box
 
         });
 
+        /**
+         * On Click Listener Sort Alphabet
+         */
+        binding.sortAlphabetic.setOnClickListener(click ->{
+            currentSortCriteria = SortCriteria.NAME;
+            sortAndSetAdapter();
+        });
+
+        /**
+         * On Click Listener Sort Frequency
+         */
+        binding.sortFrequency.setOnClickListener(click -> {
+            currentSortCriteria = SortCriteria.FREQUENCY;
+            sortAndSetAdapter();
+        });
+
+        /**
+         * On Click Listener Sort Added
+         */
+        binding.sortDateAdded.setOnClickListener(click -> {
+            currentSortCriteria = SortCriteria.ADDED;
+            sortAndSetAdapter();
+        });
+
     }
 
+    private void sortAndSetAdapter() {
+        MedDatabase medDb = new MedDatabase(this);
+        List<Medicine> medicineList = medDb.getAllMedicines();
+
+        switch (currentSortCriteria) {
+            case NAME:
+                Collections.sort(medicineList, Comparator.comparing(Medicine::getName));
+                break;
+            case FREQUENCY:
+                Collections.sort(medicineList, Comparator.comparingInt(medicine -> {
+                    try {
+                        return Integer.parseInt(medicine.getFrequency());
+                    } catch (NumberFormatException e) {
+                        return 0;
+                    }
+                }));
+                break;
+            case ADDED:
+                // Assuming Medicine class has a timestamp field for added time
+                //Collections.sort(medicineList, Comparator.comparing(Medicine::getAddedTimestamp).reversed());
+                Collections.sort(medicineList, Comparator.comparingLong(Medicine::getId));
+                break;
+        }
+
+        MedicineAdapter adapter = new MedicineAdapter(medicineList, this);
+        RecyclerView recyclerView = findViewById(R.id.recyclerView);
+        recyclerView.setAdapter(adapter);
+    }
+
+    /**
+     * Adds and set new medicine information to recyclerView
+     */
     public void setMedicineAdapter() {
         MedDatabase medDb = new MedDatabase(this);
         List<Medicine> medicineList = medDb.getAllMedicines();
@@ -184,15 +264,31 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
         recyclerView.setAdapter(adapter);
     }
 
+    /**
+     * Obtains the position of item from recyclerView and views full medicine information
+     * along with doctor's name and number
+     * @param position
+     */
     @Override
-    public void onItemClick(int position) {
+    public void onItemClick(int position, View clickedView) {
+
         MedDatabase medDb = new MedDatabase(this);
         List<Medicine> medList = medDb.getAllMedicines();
         Medicine medicine = medList.get(position);
+        List<Doctor> docList = medDb.getAllDoctor();
+        Doctor doctor = docList.get(position);
 
+        //TODO
+        /**
+         * Create function to filter current and past MEDICINE
+         */
         Intent intent = new Intent(this, MedicineDetailActivity.class);
         intent.putExtra("medicine", medicine);
+        intent.putExtra("doctor", doctor);
+        intent.putExtra("position", position);
         startActivity(intent);
+//        startActivityForResult(intent, MEDICINE_DETAIL_REQUEST_CODE);
+
     }
 
 
@@ -235,6 +331,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
         });
 
         //timePicker
+        timerPicker.setIs24HourView(false);
         timerPicker.setOnTimeChangedListener((view12, hourOfDay, minute) -> {
             String amPm;
             if (hourOfDay < 12) {

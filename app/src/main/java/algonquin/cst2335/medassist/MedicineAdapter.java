@@ -1,6 +1,7 @@
 package algonquin.cst2335.medassist;
 
 import android.content.Intent;
+import android.graphics.drawable.Icon;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -51,12 +52,14 @@ public class MedicineAdapter extends RecyclerView.Adapter<MedicineAdapter.Medici
         TextView dosage;
         TextView frequency;
         TextView quantity;
+        View calendar;
         public MedicineViewHolder(View itemView, RecyclerViewInterface recyclerViewInterface) {
             super(itemView);
             medicineName = itemView.findViewById(R.id.medicineName);
             dosage = itemView.findViewById(R.id.dosage);
             frequency = itemView.findViewById(R.id.frequency);
             quantity = itemView.findViewById(R.id.quantity);
+            calendar = itemView.findViewById(R.id.calendarIcon);
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -64,14 +67,23 @@ public class MedicineAdapter extends RecyclerView.Adapter<MedicineAdapter.Medici
                     if(recyclerViewInterface != null){
                         int position = getAdapterPosition();
                         if(position != RecyclerView.NO_POSITION){
-                            recyclerViewInterface.onItemClick(position);
+                            //recyclerViewInterface.onItemClick(position);
+                            recyclerViewInterface.onItemClick(position, v);
                         }
                     }
                 }
             });
+
+
         }
     }
     public List<Medicine> getMedicineList() {
         return medicineList;
+    }
+    public void removeMedicine(int position) {
+        if (position >= 0 && position < medicineList.size()) {
+            medicineList.remove(position);
+            notifyItemRemoved(position);
+        }
     }
 }

@@ -17,10 +17,7 @@ public class Medicine implements Parcelable {
     private String expiration;
     private String instructions;
 
-    public Medicine(){
-
-    }
-
+    public Medicine(){}
 
     public Medicine(String name, String dosage, String quantity, String frequency, String refills, String duration, String expiration, String instructions) {
         this.name = name;
