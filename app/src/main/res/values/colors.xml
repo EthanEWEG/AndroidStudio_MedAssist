@@ -11,4 +11,5 @@
     <color name="highlight">#EBF300</color>
     <color name="red">#F44336</color>
     <color name="dark_blue">#4DB4F8</color>
+    <color name="grey">#D6D6D6</color>
 </resources>
