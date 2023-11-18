@@ -3,39 +3,18 @@ package algonquin.cst2335.medassist;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.constraintlayout.widget.ConstraintSet;
-import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.app.DatePickerDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
-import android.graphics.Typeface;
 import android.os.Bundle;
-import android.transition.TransitionManager;
-import android.util.Log;
-import android.text.InputType;
-import android.view.Gravity;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CalendarView;
-import android.widget.DatePicker;
-import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.ScrollView;
-import android.widget.Spinner;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.NumberPicker;
-import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.view.View;
@@ -110,6 +89,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
             recyclerView.setAdapter(adapter.get());
 
         });
+        //opens app in current medicine view
         binding.current.performClick();
 
         /**
@@ -347,6 +327,30 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
             alertTime.setText(String.format(Locale.getDefault(), "%02d:%02d %s", hourOfDay, minute, amPm));
         });
 
+        //initialize calendarView as invisible
+        calendarView.setVisibility(View.GONE);
+        alertDate.setOnClickListener(v -> {
+            //appears/disappears when button is clicked
+            if (calendarView.getVisibility() == View.VISIBLE){
+                calendarView.setVisibility(View.GONE);
+            }
+            else if (calendarView.getVisibility() == View.GONE){
+                calendarView.setVisibility(View.VISIBLE);
+            }
+        });
+        //initialize timePicker as invisible
+        timerPicker.setVisibility(View.GONE);
+        alertTime.setOnClickListener(v -> {
+            //appears/disappears when button is clicked
+            if (timerPicker.getVisibility() == View.VISIBLE){
+                timerPicker.setVisibility(View.GONE);
+            }
+            else if (timerPicker.getVisibility() == View.GONE){
+                timerPicker.setVisibility(View.VISIBLE);
+            }
+        });
+
+
         //List options for when the notifications end
         List<String> endOptions = new ArrayList<>();
         endOptions.add("Ends never");
@@ -434,18 +438,9 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
         });
 
         //todo
-        // create calendarView for when alertDate is clicked
-        // create timePickerDialog for when alertTime is clicked
-
-        alertDate.setOnClickListener(v -> {
-            // Show CalendarView or DatePickerDialog
-            // Implement your logic here
-        });
-
-        alertTime.setOnClickListener(v -> {
-            // Show TimePickerDialog
-            // Implement your logic here
-        });
+        // add save button functionality and cancel. Save information to the database?
+        // gather all the information and set up notification with it (Calendar notification).
+        // setup expiration and duration automatic notifications.
 
         // Set up buttons and their alignment
         builder.setPositiveButton("Save", (dialogInterface, i) -> {
