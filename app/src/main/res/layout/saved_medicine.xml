@@ -95,6 +95,7 @@
         android:src="@drawable/calendar"
         android:backgroundTint="@color/white"
         android:onClick="calendar"
+        android:tag="@+id/medicineID"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent"/>

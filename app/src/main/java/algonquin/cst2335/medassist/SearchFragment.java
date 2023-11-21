@@ -2,10 +2,12 @@ package algonquin.cst2335.medassist;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -20,6 +22,7 @@ public class SearchFragment extends DialogFragment implements RecyclerViewInterf
     private MedicineAdapter adapter;
     private List<Medicine> searchResults = new ArrayList<>();
     private EditText searchEditText;
+    private TextView noMedicine;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -27,6 +30,7 @@ public class SearchFragment extends DialogFragment implements RecyclerViewInterf
 
         recyclerView = view.findViewById(R.id.searchRecyclerView);
         searchEditText = view.findViewById(R.id.searchMedInput);
+        noMedicine = view.findViewById(R.id.searchNoMedicine);
 
         // Initialize and set up your RecyclerView and adapter here
         adapter = new MedicineAdapter(searchResults, this); // 'this' refers to the SearchFragment
@@ -61,6 +65,13 @@ public class SearchFragment extends DialogFragment implements RecyclerViewInterf
                     searchResultsList.add(medicine);
                 }
             }
+        }
+        if (searchResultsList.isEmpty()){
+            noMedicine.setGravity(Gravity.CENTER);
+            noMedicine.setVisibility(View.VISIBLE);
+        }
+        else if (searchResultsList.isEmpty()){
+            noMedicine.setVisibility(View.GONE);
         }
 
         // Add the search results to the 'searchResults' list

@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CalendarView;
@@ -19,6 +20,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.view.View;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -85,6 +87,14 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
                     }
                 }
             }
+            if (currentMedList.isEmpty()){
+                binding.noMedicine.setText("No medicines in the \ncurrent database\n right now");
+                binding.noMedicine.setGravity(Gravity.CENTER);
+                binding.noMedicine.setVisibility(View.VISIBLE);
+            }
+            else if (!currentMedList.isEmpty()){
+                binding.noMedicine.setVisibility(View.GONE);
+            }
             AtomicReference<MedicineAdapter> adapter = new AtomicReference<>(new MedicineAdapter(currentMedList, this));
             recyclerView.setAdapter(adapter.get());
 
@@ -109,21 +119,32 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
             isSearchFragmentVisible = false;
 
             List<Medicine> medicineList = medDb.getAllMedicines();
-            List<Medicine> currentMedList = new ArrayList<>();
+            List<Medicine> pastMedList = new ArrayList<>();
 
             LocalDate currentDate = LocalDate.now();
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
 
-            for(Medicine medicine : medicineList){
-                String expirationDateString = medicine.getExpiration();
-                String durationDateString = medicine.getDuration();
-                LocalDate expirationDate = LocalDate.parse(expirationDateString, formatter);
-                LocalDate durationDate = LocalDate.parse(durationDateString, formatter);
-                if(currentDate.isAfter(expirationDate) || currentDate.isAfter(durationDate)){
-                    currentMedList.add(medicine);
+            if(!medicineList.isEmpty()) {
+                for (Medicine medicine : medicineList) {
+                    String expirationDateString = medicine.getExpiration();
+                    String durationDateString = medicine.getDuration();
+                    LocalDate expirationDate = LocalDate.parse(expirationDateString, formatter);
+                    LocalDate durationDate = LocalDate.parse(durationDateString, formatter);
+                    if (currentDate.isAfter(expirationDate) || currentDate.isAfter(durationDate)) {
+                        pastMedList.add(medicine);
+                    }
                 }
             }
-            AtomicReference<MedicineAdapter> adapter = new AtomicReference<>(new MedicineAdapter(currentMedList, this));
+            if (pastMedList.isEmpty()){
+                binding.noMedicine.setText("No medicines in the \npast database\n right now");
+                binding.noMedicine.setGravity(Gravity.CENTER);
+                binding.noMedicine.setVisibility(View.VISIBLE);
+            }
+            else if (!pastMedList.isEmpty()){
+                binding.noMedicine.setVisibility(View.GONE);
+            }
+
+            AtomicReference<MedicineAdapter> adapter = new AtomicReference<>(new MedicineAdapter(pastMedList, this));
             recyclerView.setAdapter(adapter.get());
         });
 
@@ -280,6 +301,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
         AlertDialog dialog = builder.create();
         dialog.setView(alertView);
 
+        //gathering all of the menu item links
         TextView alertTitle = alertView.findViewById(R.id.alertTitle);
         Button alertDate = alertView.findViewById(R.id.dateButton);
         Button alertTime = alertView.findViewById(R.id.clockButton);
@@ -291,18 +313,15 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
         Spinner alertFrequency = alertView.findViewById(R.id.spinnerFrequency);
         Spinner alertEnd = alertView.findViewById(R.id.spinnerEnd);
         Spinner alertAlert = alertView.findViewById(R.id.spinnerAlert);
-        CalendarView calendarView = (CalendarView) alertView.findViewById(R.id.calendarView);
+        CalendarView calendarView = alertView.findViewById(R.id.calendarView);
         TimePicker timerPicker = alertView.findViewById(R.id.timePicker);
+        //gets the corresponding medicine DB ID
+        String medicineId = view.getTag(R.id.medicineID).toString();
+        //save/cancel buttons
+        Button alertSave = alertView.findViewById(R.id.save);
+        Button alertCancelNoti = alertView.findViewById(R.id.cancel);
 
-        //set the title to medicines name
-        //alertTitle.setText();
 
-        // Set the date and time to the current date and time
-        Calendar currentDateTime = Calendar.getInstance();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd", Locale.getDefault());
-        SimpleDateFormat timeFormat = new SimpleDateFormat("hh:mm a", Locale.getDefault());
-        alertDate.setText(dateFormat.format(currentDateTime.getTime()));
-        alertTime.setText(timeFormat.format(currentDateTime.getTime()));
 
         //calenderView
         calendarView.setOnDateChangeListener((view1, year, month, dayOfMonth) -> {
@@ -360,13 +379,12 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
         }
 
         //List options for when to receive the notification
+        List<String> freqOptions = new ArrayList<>();
         String[] alertAlertOptions = {"Event end time", "0 minutes", "1 minute", "5 minutes", "10 minutes", "15 minutes", "20 minutes", "30 minutes", "45 minutes", "60 minutes",
                 "90 minutes", "2 hours", "3 hours", "4 hours", "6 hours", "8 hours", "12 hours", "18 hours", "24 hours", "2 days", "3 days", "5 days", "7 days", "10 days", "14 days", "21 days", "28 days"};
 
         //String to chose which day week month or year button should display
         final String[] DWMY = { "day" };
-        //List options for when the notifications end
-        List<String> freqOptions = new ArrayList<>();
 
 
         // Initialize the adapter for alertEnd spinner
@@ -378,8 +396,6 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
         ArrayAdapter<String> alertAlertAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, alertAlertOptions);
         alertAlertAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         alertAlert.setAdapter(alertAlertAdapter);
-        //sets the default value to 15 minutes (index 5)
-        alertAlert.setSelection(5);
 
         // Initialize the adapter for alertFrequency spinner
         ArrayAdapter<String> freqAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, freqOptions);
@@ -437,19 +453,190 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
             alertEnd.setSelection(0);
         });
 
+
+
+        //tracks if a notification was found in the db
+        boolean notificationFound = false;
+        //Gets an instance of MedDatabase
+        MedDatabase medDatabase = new MedDatabase(this);
+        //gets all database notification rows
+        List<Notification> notificationList = medDatabase.getAllNotifications();
+
+        //iterates over all notification rows
+        //This is where the notification saving happens
+        for (Notification notification : notificationList){
+            if (notification.getMedicineId() == Long.parseLong(medicineId)){
+                alertTitle.setText(notification.getNotiName());
+                alertDate.setText(notification.getNotiDate());
+                alertTime.setText(notification.getNotiTime());
+                alertTime.setText(notification.getNotiTime());
+                //spinner repeat date
+                for (int i = 0; i <= alertFrequency.getCount(); i++){
+                    Object item = alertFrequency.getItemAtPosition(i);
+                    if (item != null && item.equals(notification.getNotiRepeatDate())){
+                        alertFrequency.setSelection(i);
+                        break;
+                    }
+                }
+                //spinner repeat occurence
+                for (int i = 0; i <= alertEnd.getCount(); i++){
+                    Object item = alertEnd.getItemAtPosition(i);
+                    if (item != null && item.equals(notification.getNotiRepeatAmount())){
+                        alertEnd.setSelection(i);
+                        break;
+                    }
+                }
+                //spinner for when to receive notification
+                for (int i = 0; i <= alertAlert.getCount(); i++){
+                    Object item = alertAlert.getItemAtPosition(i);
+                    if (item != null && item.equals(notification.getNotiTimeBefore())){
+                        alertAlert.setSelection(i);
+                        break;
+                    }
+                }
+
+                //change the button text
+                alertSave.setText("Update");
+                alertCancelNoti.setText("Remove");
+
+                //Button listeners
+                //updates all the notification information (this button would now have the text(update))
+                alertSave.setOnClickListener(v ->{
+
+                    //user information formatted how its needed
+                    String notificationName = alertTitle.getText().toString();
+                    String notificationDate = alertDate.getText().toString();
+                    String notificationTime = alertTime.getText().toString();
+                    String notificationRepeatDate = alertFrequency.getSelectedItem().toString();
+                    String notificationRepeatAmount = alertEnd.getSelectedItem().toString();
+                    String notificationTimeBefore = alertAlert.getSelectedItem().toString();
+                    long medicineID = Long.parseLong(medicineId);
+
+                    // Create a Notification object with the users input
+                    Notification updateNotification = new Notification(notificationName, notificationDate, notificationTime,
+                            notificationRepeatDate, notificationRepeatAmount, notificationTimeBefore, medicineID);
+
+                    // Inserts the new Notification info into the database
+                    MedDatabase medDb = new MedDatabase(this);
+
+                    //gets the notification ID based on medicine ID
+                    long notificationID = medDb.getNotificationByMedicineId(medicineID);
+
+                    //updates the info
+                    long newRowId = medDb.updateNotification(notificationID, updateNotification);
+
+                    if (newRowId != -1) {
+                        dialog.dismiss();
+                        Toast.makeText(this, "Notification "+ notificationName +" updated", Toast.LENGTH_LONG).show();
+                    } else {
+                        // Handle insertion failure
+                        Toast.makeText(this, "Failed to updated notification. Please try again.", Toast.LENGTH_LONG).show();
+                    }
+
+                });
+                //removes the notification (this button would now have the text(remove))
+                alertCancelNoti.setOnClickListener(v ->{
+
+                    //notification name
+                    String notificationName = alertTitle.getText().toString();
+                    //medicineID foreign key
+                    long medicineID = Long.parseLong(medicineId);
+
+                    // Inserts the new Notification info into the database
+                    MedDatabase medDb = new MedDatabase(this);
+
+                    //gets the notification ID based on medicine ID
+                    long notificationID = medDb.getNotificationByMedicineId(medicineID);
+
+                    //removes the notification
+                    long newRowId = medDb.deleteNotification(notificationID);
+
+                    if (newRowId != -1) {
+                        dialog.dismiss();
+                        Toast.makeText(this, "Notification "+ notificationName +" removed", Toast.LENGTH_LONG).show();
+                    } else {
+                        // Handle insertion failure
+                        Toast.makeText(this, "Failed to remove notification. Please try again.", Toast.LENGTH_LONG).show();
+                    }
+                });
+
+                notificationFound = true;
+
+            }
+        }
+
+        if (!notificationFound){
+            //setting of initial values
+
+            //set the title to medicines name
+            //Gets the list of all medicines from the database
+            List<Medicine> medicineList = medDatabase.getAllMedicines();
+            //Now iterating through the medicineList and accessing individual Medicine objects
+            for (Medicine medicine : medicineList) {
+                String DBmedicineId = String.valueOf(medicine.getId());
+                String DBmedicineName = medicine.getName();
+
+                if (DBmedicineId.equals(medicineId)){
+                    alertTitle.setText(DBmedicineName);
+                }
+
+            }
+
+            // Set the date and time to the current date and time
+            Calendar currentDateTime = Calendar.getInstance();
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd", Locale.getDefault());
+            SimpleDateFormat timeFormat = new SimpleDateFormat("hh:mm a", Locale.getDefault());
+            alertDate.setText(dateFormat.format(currentDateTime.getTime()));
+            alertTime.setText(timeFormat.format(currentDateTime.getTime()));
+
+            //sets the default value to 15 minutes (index 5)
+            alertAlert.setSelection(5);
+
+            //Button listeners
+            //saves all the notification information
+            alertSave.setOnClickListener(v ->{
+
+                //user information formatted how its needed
+                String notificationName = alertTitle.getText().toString();
+                String notificationDate = alertDate.getText().toString();
+                String notificationTime = alertTime.getText().toString();
+                String notificationRepeatDate = alertFrequency.getSelectedItem().toString();
+                String notificationRepeatAmount = alertEnd.getSelectedItem().toString();
+                String notificationTimeBefore = alertAlert.getSelectedItem().toString();
+                long medicineID = Long.parseLong(medicineId);
+
+                // Create a Notification object with the users input
+                Notification newNotification = new Notification(notificationName, notificationDate, notificationTime,
+                        notificationRepeatDate, notificationRepeatAmount, notificationTimeBefore, medicineID);
+
+                // Inserts the new Notification info into the database
+                MedDatabase medDb = new MedDatabase(this);
+
+                long newRowId = medDb.insertNotification(newNotification);
+
+                if (newRowId != -1) {
+                    dialog.dismiss();
+                    Toast.makeText(this, "Notification "+ notificationName +" added", Toast.LENGTH_LONG).show();
+                } else {
+                    // Handle insertion failure
+                    Toast.makeText(this, "Failed to add notification. Please try again.", Toast.LENGTH_LONG).show();
+                }
+
+            });
+
+            alertCancelNoti.setOnClickListener(v ->{
+
+                dialog.dismiss();
+
+            });
+
+        }
+
+
+
         //todo
-        // add save button functionality and cancel. Save information to the database?
         // gather all the information and set up notification with it (Calendar notification).
         // setup expiration and duration automatic notifications.
-
-        // Set up buttons and their alignment
-        builder.setPositiveButton("Save", (dialogInterface, i) -> {
-            // Handle Save button click
-        });
-
-        builder.setNegativeButton("Cancel", (dialogInterface, i) -> {
-            // Handle Cancel button click
-        });
 
         // Set layout parameters for the custom view
         ConstraintLayout.LayoutParams layoutParams = new ConstraintLayout.LayoutParams(

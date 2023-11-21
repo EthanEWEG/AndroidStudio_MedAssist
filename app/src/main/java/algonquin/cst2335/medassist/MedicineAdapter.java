@@ -5,6 +5,7 @@ import android.graphics.drawable.Icon;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -38,6 +39,8 @@ public class MedicineAdapter extends RecyclerView.Adapter<MedicineAdapter.Medici
         holder.dosage.setText(medicine.getDosage());
         holder.frequency.setText(medicine.getFrequency());
         holder.quantity.setText(medicine.getQuantity());
+        //sets tag to track which notification button was clicked
+        holder.calendarIcon.setTag(R.id.medicineID, medicine.getId());
 
     }
 
@@ -52,6 +55,7 @@ public class MedicineAdapter extends RecyclerView.Adapter<MedicineAdapter.Medici
         TextView dosage;
         TextView frequency;
         TextView quantity;
+        ImageButton calendarIcon;
         View calendar;
         public MedicineViewHolder(View itemView, RecyclerViewInterface recyclerViewInterface) {
             super(itemView);
@@ -59,6 +63,7 @@ public class MedicineAdapter extends RecyclerView.Adapter<MedicineAdapter.Medici
             dosage = itemView.findViewById(R.id.dosage);
             frequency = itemView.findViewById(R.id.frequency);
             quantity = itemView.findViewById(R.id.quantity);
+            calendarIcon = itemView.findViewById(R.id.calendarIcon);
             calendar = itemView.findViewById(R.id.calendarIcon);
 
             itemView.setOnClickListener(new View.OnClickListener() {

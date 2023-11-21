@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import algonquin.cst2335.medassist.databinding.AddFragmentBinding;
+import algonquin.cst2335.medassist.databinding.MedViewBinding;
 
 import android.content.pm.PackageManager;
 import android.Manifest;
@@ -39,6 +40,7 @@ import com.google.zxing.integration.android.IntentResult;
 public class AddFragment extends DialogFragment{
 
     AddFragmentBinding binding;
+    MedViewBinding bindingClick;
     private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
     // Define a constant for camera permission request
     private static final int REQUEST_CAMERA_PERMISSION = 1;
@@ -60,6 +62,7 @@ public class AddFragment extends DialogFragment{
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate your custom layout
         binding = AddFragmentBinding.inflate(inflater, container, false);
+        bindingClick = MedViewBinding.inflate(inflater, container, false);
         View view = (binding.getRoot());
 
         cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext());
@@ -124,6 +127,7 @@ public class AddFragment extends DialogFragment{
                     setMedicineAdapterInMainActivity();
                     // Close the AddFragment or update UI as needed
                     dismiss();
+                    bindingClick.current.performClick();
                 } else {
                     // Handle insertion failure
                     Toast.makeText(requireContext(), "Failed to add medicine. Please try again.", Toast.LENGTH_LONG).show();

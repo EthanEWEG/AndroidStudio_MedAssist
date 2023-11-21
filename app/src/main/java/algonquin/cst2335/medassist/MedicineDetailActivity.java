@@ -65,7 +65,7 @@ public class MedicineDetailActivity extends AppCompatActivity {
     private void deleteMedicine() {
         // Call the method from MedDatabase to delete the record
         MedDatabase dbHelper = new MedDatabase(this);
-        dbHelper.deleteMedicine(medicineToDelete);
+        dbHelper.deleteMedicine(medicineToDelete.getId());
     }
 
     /**
