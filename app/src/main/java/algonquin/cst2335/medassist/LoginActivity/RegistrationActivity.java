@@ -1,5 +1,5 @@
 // RegistrationActivity.java
-package algonquin.cst2335.medassist;
+package algonquin.cst2335.medassist.LoginActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -9,9 +9,16 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import algonquin.cst2335.medassist.databinding.MedFragmentBinding;
+import algonquin.cst2335.medassist.Medicine.MedDatabase;
 import algonquin.cst2335.medassist.databinding.RegistrationBinding;
 
+/**
+ * The RegistrationActivity class allows users to register a new account by providing a username,
+ * password, and passcode. The user registration information is stored in the MedDatabase.
+ *
+ * @see algonquin.cst2335.medassist.Medicine.MedDatabase
+ * @see algonquin.cst2335.medassist.databinding.RegistrationBinding
+ */
 public class RegistrationActivity extends AppCompatActivity {
 
     RegistrationBinding binding;
@@ -22,9 +29,7 @@ public class RegistrationActivity extends AppCompatActivity {
         binding = RegistrationBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        registerButton = binding.registerButton;
-
-        registerButton.setOnClickListener(new View.OnClickListener() {
+        binding.registerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 // Implement your user registration logic here.

@@ -1,22 +1,24 @@
-package algonquin.cst2335.medassist;
+package algonquin.cst2335.medassist.Main;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.snackbar.Snackbar;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import algonquin.cst2335.medassist.Medicine.Doctor;
+import algonquin.cst2335.medassist.Medicine.MedDatabase;
+import algonquin.cst2335.medassist.Medicine.Medicine;
 import algonquin.cst2335.medassist.databinding.MedFragmentBinding;
 
 public class MedicineDetailActivity extends AppCompatActivity {
     MedFragmentBinding binding;
     Button deleteButton;
     private Medicine medicineToDelete;
+    private Doctor doctorToDelete;
+    private RecyclerViewInterface recyclerViewInterface;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,7 +49,7 @@ public class MedicineDetailActivity extends AppCompatActivity {
 
         deleteButton.setOnClickListener(view ->{
             medicineToDelete = medicine;
-
+            doctorToDelete = doctor;
             //Allows user to undo deletion in the event of misclick
             Snackbar snackbar = Snackbar.make(view, "Medicine deleted", Snackbar.LENGTH_LONG)
                     .setAction("Undo", v -> undoDeletion(medicineToDelete));
@@ -56,6 +58,11 @@ public class MedicineDetailActivity extends AppCompatActivity {
 
             //Deletes medicine
             deleteMedicine();
+
+            if (recyclerViewInterface != null) {
+                recyclerViewInterface.onMedicineDeleted();
+            }
+            new Handler().postDelayed(() -> finish(), 10000);
         });
     }
 
@@ -65,18 +72,20 @@ public class MedicineDetailActivity extends AppCompatActivity {
     private void deleteMedicine() {
         // Call the method from MedDatabase to delete the record
         MedDatabase dbHelper = new MedDatabase(this);
-        dbHelper.deleteMedicine(medicineToDelete.getId());
+        dbHelper.deleteMedicine(medicineToDelete, doctorToDelete);
     }
 
     /**
+     * Undoes the deletion of a Medicine by restoring it to the database.
      *
+     * @param medicineToDelete The Medicine object representing the deleted medicine.
      */
     private void undoDeletion(Medicine medicineToDelete) {
         // Restore the medicine to the database
         MedDatabase dbHelper = new MedDatabase(this);
-        dbHelper.insertMedicine(medicineToDelete);
+        dbHelper.insertMedicine(medicineToDelete, doctorToDelete);
 
         // Show a message indicating that the deletion has been undone
-        Snackbar.make(binding.getRoot(), "Deletion undone", Snackbar.LENGTH_SHORT).show();
+        Snackbar.make(binding.getRoot(), "Undo Deletion?", Snackbar.LENGTH_LONG).show();
     }
 }

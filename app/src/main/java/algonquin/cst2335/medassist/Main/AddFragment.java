@@ -1,68 +1,54 @@
-package algonquin.cst2335.medassist;
+package algonquin.cst2335.medassist.Main;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.camera.lifecycle.ProcessCameraProvider;
-import androidx.camera.view.PreviewView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.DialogFragment;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.List;
+import java.time.format.DateTimeParseException;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.concurrent.ExecutionException;
 
+import algonquin.cst2335.medassist.Medicine.Doctor;
+import algonquin.cst2335.medassist.Medicine.MedDatabase;
+import algonquin.cst2335.medassist.Medicine.Medicine;
 import algonquin.cst2335.medassist.databinding.AddFragmentBinding;
-import algonquin.cst2335.medassist.databinding.MedViewBinding;
 
 import android.content.pm.PackageManager;
 import android.Manifest;
 import android.widget.Toast;
-import androidx.lifecycle.LifecycleOwner;
+
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
 public class AddFragment extends DialogFragment{
 
     AddFragmentBinding binding;
-    MedViewBinding bindingClick;
+    private RecyclerViewInterface recyclerViewInterface;
     private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
     // Define a constant for camera permission request
     private static final int REQUEST_CAMERA_PERMISSION = 1;
-
-
-//    private void refreshMedicineList() {
-//        MedDatabase medDb = new MedDatabase(requireContext());
-//        List<Medicine> medicineList = medDb.getAllMedicines();
-//        MedicineAdapter adapter = new MedicineAdapter(medicineList, this);
-//        RecyclerView recyclerView = requireActivity().findViewById(R.id.recyclerView);
-//        recyclerView.setAdapter(adapter);
-//    }
-    private void setMedicineAdapterInMainActivity() {
-        MainActivity mainActivity = (MainActivity) requireActivity();
-        mainActivity.setMedicineAdapter();
-    }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate your custom layout
         binding = AddFragmentBinding.inflate(inflater, container, false);
-        bindingClick = MedViewBinding.inflate(inflater, container, false);
         View view = (binding.getRoot());
 
         cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext());
@@ -84,9 +70,6 @@ public class AddFragment extends DialogFragment{
 
         });
 
-        /**
-         * notification for medication and prescription
-         */
 
         /**
          * Submits information for medicine
@@ -104,45 +87,77 @@ public class AddFragment extends DialogFragment{
             String docName = binding.editDocName.getText().toString();
             String docNumber = binding.editDocNumber.getText().toString();
             String instructions = binding.editInstructions.getText().toString();
+
             if (instructions.isEmpty()){
                 instructions = "No special Instructions were specified";
             }
-            // Create a Medicine object with user input
-            Medicine newMedicine = new Medicine(medName, dosage, quantity, frequency, refills, duration, expiration, instructions);
-            Doctor newDoc = new Doctor(docName, docNumber);
-            //TODO
-            /**
-             * Perform individual alerts for each text field
-             */
-            if(isInputValid(medName, dosage, quantity, frequency, refills, duration, expiration, instructions, docName, docNumber) && isValidDate(duration) && isValidDate(expiration)) {
-                // Insert the new medicine into the database
-                MedDatabase medDb = new MedDatabase(requireContext());
+            docNumber = validateAndFormatPhoneNumber(docNumber);
+            if(isValidDate(duration, true) && isValidDate(expiration, true)) {
+                // Create a Medicine object with user input
+                Medicine newMedicine = new Medicine(medName, dosage, quantity, frequency, refills, duration, expiration, instructions);
+                Doctor newDoc = new Doctor(docName, docNumber);
 
-                long newRowId = medDb.insertMedicine(newMedicine);
-                long newDocId = medDb.insertDoc(newDoc);
+                if (isInputValid(medName, dosage, quantity, frequency, refills, duration, expiration, instructions, docName, docNumber)) {
+                    // Insert the new medicine into the database
+                    MedDatabase medDb = new MedDatabase(requireContext());
 
-                if (newRowId != -1 || newDocId != -1) {
-                    // Successfully added the medicine to the database, refresh the RecyclerView
-                    //refreshMedicineList();
-                    setMedicineAdapterInMainActivity();
-                    // Close the AddFragment or update UI as needed
-                    dismiss();
-                    bindingClick.current.performClick();
-                } else {
-                    // Handle insertion failure
-                    Toast.makeText(requireContext(), "Failed to add medicine. Please try again.", Toast.LENGTH_LONG).show();
+                    long newRowId = medDb.insertMedicine(newMedicine, newDoc);
+
+
+                    if (newRowId != -1) {
+                        // Successfully added the medicine to the database, refresh the RecyclerView
+                        //setMedicineAdapterInMainActivity();
+                        if(recyclerViewInterface != null){
+                            recyclerViewInterface.onMedicineAdded();
+                        }
+                        // Close the AddFragment or update UI as needed
+                        dismiss();
+                    } else {
+                        // Handle insertion failure
+                        Toast.makeText(requireContext(), "Failed to add medicine. Please try again.", Toast.LENGTH_LONG).show();
+                    }
                 }
-            }else{
-                Toast.makeText(requireContext(), "Double check all fields have been entered correctly. Use the format YYYY/MM/DD for duration and expiration.", Toast.LENGTH_LONG).show();
+
+            } else {
+                Toast.makeText(requireContext(), "Double check your month and day. Date cannot be before current date.", Toast.LENGTH_LONG).show();
             }
-
-
         });
 
         return view;
     }
+
+    /**
+     * Checks the validity of phone number that the user entered. It must be 10 digits long
+     * @param docNumber - The number entered by user
+     * @return - The doctors number if valid, else returns null.
+     */
+    private String validateAndFormatPhoneNumber(String docNumber) {
+        docNumber = docNumber.replaceAll("[^0-9]", "");
+
+        if (docNumber.length() == 10) {
+            return docNumber;
+        } else {
+            Toast.makeText(requireContext(), "Invalid phone number. Please enter a 10-digit phone number.", Toast.LENGTH_LONG).show();
+            return null;
+        }
+    }
+
+    /**
+     * Checks to see if each input is valid
+     * @param medName - Name of medicine
+     * @param dosage - Dosage of Medicine
+     * @param quantity - The amount to intake
+     * @param frequency - How often medicine should be taken
+     * @param refills - The amount of refills
+     * @param duration - The duration of medication
+     * @param expiration - The expiration of medicine
+     * @param instructions - Special instructions for intake of medicine. E.g., Take with food
+     * @param docName - Name of Doctor
+     * @param docNumber - Phone Number of Doctor
+     * @return
+     */
     private boolean isInputValid(String medName, String dosage, String quantity, String frequency, String refills, String duration, String expiration, String instructions, String docName, String docNumber){
-//        return !medName.isEmpty() && !dosage.isEmpty() && !quantity.isEmpty() && !frequency.isEmpty() && !refills.isEmpty() && !duration.isEmpty() && !expiration.isEmpty() && !instructions.isEmpty();
+
         String[] fields = {"Medication Name", "Dosage", "Quantity", "Frequency", "Refills", "Duration", "Expiration","Doctor Name", "Doctor Number"};
         int empFieldCount = 0;
 
@@ -150,18 +165,33 @@ public class AddFragment extends DialogFragment{
             String value = getValueByIndex(i, medName, dosage, quantity, frequency, refills, duration, expiration, instructions, docName, docNumber);
 
             if (value.isEmpty()) {
-                Toast.makeText(requireContext(), "Please enter " + fields[i], Toast.LENGTH_LONG).show();
+                Toast.makeText(requireContext(), "Please enter " + fields[i] + " value.", Toast.LENGTH_LONG).show();
                 empFieldCount++;
             }
 
             if (empFieldCount > 0) {
-                Toast.makeText(requireContext(), "Please fill in all the required fields", Toast.LENGTH_LONG).show();
+                Toast.makeText(requireContext(), "Double check all fields have been entered correctly.", Toast.LENGTH_LONG).show();
                 return false;
             }
         }
         return true;
     }
 
+    /**
+     * Obtains the value of each field and checks to see if it is empty. Else, it will return value.
+     * @param index - The ID
+     * @param medName - The name of medicine
+     * @param dosage - The dosage of medicine
+     * @param quantity - The amount of medicine
+     * @param frequency - The frequency of intaking medicine
+     * @param refills - The amount of refills needed
+     * @param duration - The duration of medication
+     * @param expiration - The expiration of medicine
+     * @param instructions - Special instructions for medication. E.g., Take with food
+     * @param docName - Name of Doctor
+     * @param docNumber - Phone Number of Doctor
+     * @return - Values for each textField
+     */
     private String getValueByIndex(int index, String medName, String dosage, String quantity, String frequency, String refills, String duration, String expiration, String instructions, String docName, String docNumber) {
         switch (index) {
             case 0:
@@ -189,28 +219,99 @@ public class AddFragment extends DialogFragment{
         }
     }
 
-    private boolean isValidDate(String date){
-        if(date.matches("\\d{4}/\\d{2}/\\d{2}")){
-            try{
+    /**
+     * Checks the date entered by user to follow standard protocol. E.g., date entered is after current
+     * date, date entered respects the day of month. For example, 2023/02/30 will return false,
+     * 2023/02/28 will return true.
+     * @param date - Date entered by user.
+     * @param checkValidity - True to check validity of date
+     * @return
+     */
+    private boolean isValidDate(String date, boolean checkValidity){
+        if (date.matches("\\d{4}/\\d{2}/\\d{2}")) {
+            try {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
                 sdf.setLenient(false);
-                sdf.parse(date);
-                return true;
-            } catch (ParseException e) {
+                Date parsedDate = sdf.parse(date);
+
+                if (checkDateValidity(parsedDate) && (checkValidity || checkDateIsAfterToday(parsedDate))) {
+                    return true;
+                }
+            } catch (DateTimeParseException | ParseException e) {
                 return false;
             }
         }
         return false;
     }
+
+    /**
+     * Checks if the month is greater than 12 or less than 1, and the day is within the valid range for the month.
+     * If invalid, shows a toast and returns false.
+     * @param date - The date entered by the user
+     * @return - True if the date entered is valid e.g., 2023/03/29. False if date entered is not
+     *          valid e.g., 2023/02/30
+     */
+    private boolean checkDateValidity(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+
+        int month = calendar.get(Calendar.MONTH) + 1; // Month is 0-based in Calendar
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+        Log.w("checkDateValidity: ", calendar.toString());
+        if (month < 1 || month > 12) {
+            Toast.makeText(requireContext(), "Invalid month. Please enter a month between 1 and 12.", Toast.LENGTH_LONG).show();
+            return false;
+        }
+
+        // Check if the day is within the valid range for the month
+        int maxDaysInMonth = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+        if (day < 1 || day > maxDaysInMonth) {
+            Toast.makeText(requireContext(), "Invalid day. Please enter a valid day for the selected month.", Toast.LENGTH_LONG).show();
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Checks if the date is after today's date. If not, shows a toast and returns false.
+     * @param date - Date entered by user
+     * @return - True, if the date entered is after current date. False, if date entered is before
+     *           current date.
+     */
+    private boolean checkDateIsAfterToday(Date date) {
+        long dateMillis = date.getTime();
+        long currentDateMillis = System.currentTimeMillis();
+
+        if (dateMillis < currentDateMillis) {
+            Toast.makeText(requireContext(), "Invalid date. Please enter a date after today.", Toast.LENGTH_LONG).show();
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Checks whether the camera permission is granted
+     * @return - {@code true} if the camera permission is granted, {@code false} otherwise.
+     */
     private boolean checkCameraPermissions() {
         return ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
     }
 
+    /**
+     * Requests camera permissions from the user.
+     * The result of the permission request will be handled in the onRequestPermissionsResult method.
+     */
     private void requestCameraPermissions() {
         ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA_PERMISSION);
     }
 
-    //Starts up the camera for scanning
+    /**
+     * Initiates the process of starting the camera for scanning QR codes.
+     * Uses the IntentIntegrator to configure the camera settings and launches the scanning activity.
+     * The result of the scanning activity will be handled by the scanActivityResultLauncher.
+     */
     private void startCamera() {
         IntentIntegrator intentIntegrator = new IntentIntegrator(getActivity());
         intentIntegrator.setOrientationLocked(false);
@@ -219,6 +320,12 @@ public class AddFragment extends DialogFragment{
         scanActivityResultLauncher.launch(intentIntegrator.createScanIntent());
     }
 
+    /**
+     * Activity result launcher for handling the result of the QR code scanning activity.
+     * Uses IntentIntegrator to parse the scanning result and extracts information from the scanned QR code.
+     * The scanned data is then populated into corresponding EditText fields in the UI.
+     * Displays a Toast message indicating the success or failure of the QR code reading.
+     */
     private final ActivityResultLauncher<Intent> scanActivityResultLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             result -> {

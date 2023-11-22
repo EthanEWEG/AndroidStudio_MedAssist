@@ -1,4 +1,4 @@
-package algonquin.cst2335.medassist;
+package algonquin.cst2335.medassist.LoginActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -8,32 +8,40 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-public class LoginActivity extends AppCompatActivity{
-    EditText userEditText;
-    EditText passwordEditText;
-    Button loginButton;
+import algonquin.cst2335.medassist.Main.MainActivity;
+import algonquin.cst2335.medassist.Medicine.MedDatabase;
+import algonquin.cst2335.medassist.R;
+import algonquin.cst2335.medassist.databinding.LoginMedBinding;
 
-    Button createUserButton;
+/**
+ * The LoginActivity class allows users to log in to the MedAssist application by providing
+ * their username and password. Users can also navigate to the registration and forgot password
+ * screens from this activity.
+ *
+ * @see algonquin.cst2335.medassist.Main.MainActivity
+ * @see algonquin.cst2335.medassist.Medicine.MedDatabase
+ * @see algonquin.cst2335.medassist.R
+ * @see algonquin.cst2335.medassist.databinding.LoginMedBinding
+ */
+public class LoginActivity extends AppCompatActivity{
+
+    LoginMedBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.login_med);
-
-        userEditText = findViewById(R.id.userEditText);
-        passwordEditText = findViewById(R.id.passwordEditText);
-        loginButton = findViewById(R.id.loginButton);
-        createUserButton = findViewById(R.id.createUserButton);
+        binding = LoginMedBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
         /**
          * When user clicks on the login button, it checks to see if the username
          * and password exist in database. If it matches, it will let user login, else displays
          * invalid username/password message
          */
-        loginButton.setOnClickListener(view -> {
+        binding.loginButton.setOnClickListener(view -> {
             // Get the email address from the EditText
-            String username = userEditText.getText().toString();
-            String password = passwordEditText.getText().toString();
+            String username = binding.userEditText.getText().toString();
+            String password = binding.passwordEditText.getText().toString();
 
             if (checkUserCredentials(username, password)) {
                 // If a matching record is found, proceed to the next activity (e.g., MainActivity)
@@ -46,10 +54,15 @@ public class LoginActivity extends AppCompatActivity{
             }
         });
 
-        createUserButton.setOnClickListener(view -> {
+        binding.createUserButton.setOnClickListener(view -> {
             Intent registrationIntent = new Intent(LoginActivity.this, RegistrationActivity.class);
             startActivity(registrationIntent);
         });
+
+        binding.forgotButton.setOnClickListener((view ->{
+            Intent forgotIntent = new Intent(LoginActivity.this, ForgotActivity.class);
+            startActivity(forgotIntent);
+        }));
 
     }
 

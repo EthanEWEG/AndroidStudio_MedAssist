@@ -1,4 +1,4 @@
-package algonquin.cst2335.medassist;
+package algonquin.cst2335.medassist.Medicine;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -6,13 +6,11 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-//TODO
-/**
- * Add table for Doctor + information (Phone number)
- */
 public class MedDatabase extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "medicine_db";
     private static final int DATABASE_VERSION = 1;
@@ -49,25 +47,18 @@ public class MedDatabase extends SQLiteOpenHelper {
     private static final String COLUMN_DOCNUM = "doc_phone";
 
     /**
-     * Notification
+     *  Constructs a new instance of the MedDatabase class.
+     * @param context - The context used to create or open the database.
+     *                  Typically, this is the application context.
      */
-    private static final String TABLE_NOTIFICATION = "notification";
-    private static final String COLUMN_NOTIFICATION_ID = "noti_id";
-    private static final String COLUMN_NOTIFICATION_NAME = "noti_name";
-    private static final String COLUMN_NOTIFICATION_DATE = "noti_date";
-    private static final String COLUMN_NOTIFICATION_TIME = "noti_time";
-    private static final String COLUMN_NOTIFICATION_REPEAT_DATE = "noti_repeat_date";
-    private static final String COLUMN_NOTIFICATION_REPEAT_AMOUNT = "noti_repeat_amount";
-    private static final String COLUMN_NOTIFICATION_TIME_BEFORE = "noti_time_before";
-    private static final String COLUMN_MEDICINE_ID = "medicine_id";
-
-
-
-
     public MedDatabase(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
+    /**
+     * Creates and initiates the database for Medicine, Doctor, and Users
+     * @param db The database.
+     */
     @Override
     public void onCreate(SQLiteDatabase db) {
         String createTableSQL = "CREATE TABLE " + TABLE_MEDICINE + " (" +
@@ -98,19 +89,6 @@ public class MedDatabase extends SQLiteOpenHelper {
                 COLUMN_DOCNUM + " TEXT" +
                 ")";
         db.execSQL(createDoctorTableSQL);
-
-        String createNotificationTableSQL = "CREATE TABLE " + TABLE_NOTIFICATION + " (" +
-                COLUMN_NOTIFICATION_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
-                COLUMN_MEDICINE_ID + " INTEGER," +
-                COLUMN_NOTIFICATION_NAME + " TEXT," +
-                COLUMN_NOTIFICATION_DATE + " TEXT," +
-                COLUMN_NOTIFICATION_TIME + " TEXT," +
-                COLUMN_NOTIFICATION_REPEAT_DATE + " TEXT," +
-                COLUMN_NOTIFICATION_REPEAT_AMOUNT + " TEXT," +
-                COLUMN_NOTIFICATION_TIME_BEFORE + " TEXT," +
-                "FOREIGN KEY (" + COLUMN_MEDICINE_ID + ") REFERENCES " + TABLE_MEDICINE + "(" + COLUMN_MEDICINE_ID + ")" +
-                ")";
-        db.execSQL(createNotificationTableSQL);
     }
 
     @Override
@@ -120,10 +98,12 @@ public class MedDatabase extends SQLiteOpenHelper {
 
     /**
      * Inserts medicine information into database
-     * @param medicine
+     * Inserts Doctor with respect to medicine ID
+     * @param medicine - The medicine information
+     * @param doctor - The doctors information
      * @return ID - ID of medicine information
      */
-    public long insertMedicine(Medicine medicine) {
+    public long insertMedicine(Medicine medicine, Doctor doctor) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
@@ -137,6 +117,15 @@ public class MedDatabase extends SQLiteOpenHelper {
         values.put(COLUMN_INSTRUCTIONS, medicine.getInstructions());
 
         long newRowId = db.insert(TABLE_MEDICINE, null, values);
+
+        if (newRowId != -1 && doctor != null) {
+            ContentValues doctorValues = new ContentValues();
+            doctorValues.put(COLUMN_DOC_ID, newRowId); // Use medicine ID as the foreign key
+            doctorValues.put(COLUMN_DOCNAME, doctor.getDocName());
+            doctorValues.put(COLUMN_DOCNUM, doctor.getDocNumber());
+            db.insert(TABLE_DOCTOR, null, doctorValues);
+        }
+
         db.close();
 
         return newRowId;
@@ -164,77 +153,8 @@ public class MedDatabase extends SQLiteOpenHelper {
     }
 
     /**
-     * Insert Doctor's information (name and number)
-     * @param doctor - The doctors name and phone number
-     * @return The ID of the doctors information
-     */
-    public long insertDoc(Doctor doctor){
-        SQLiteDatabase db = this.getWritableDatabase();
-
-        ContentValues values = new ContentValues();
-        values.put(COLUMN_DOCNAME, doctor.getDocName());
-        values.put(COLUMN_DOCNUM, doctor.getDocNumber());
-
-        long newRowId = db.insert(TABLE_DOCTOR, null, values);
-        db.close();
-
-        return newRowId;
-    }
-
-    /**
-     * Insert Notifications's information (date,time,repeatdate,repeatamount,beforetime)
-     * @param notification - all notification details
-     * @return The ID of the Notifications information
-     */
-    public long insertNotification(Notification notification){
-        SQLiteDatabase db = this.getWritableDatabase();
-
-        ContentValues values = new ContentValues();
-        values.put(COLUMN_MEDICINE_ID, notification.getMedicineId());
-        values.put(COLUMN_NOTIFICATION_NAME, notification.getNotiName());
-        values.put(COLUMN_NOTIFICATION_DATE, notification.getNotiDate());
-        values.put(COLUMN_NOTIFICATION_TIME, notification.getNotiTime());
-        values.put(COLUMN_NOTIFICATION_REPEAT_DATE, notification.getNotiRepeatDate());
-        values.put(COLUMN_NOTIFICATION_REPEAT_AMOUNT, notification.getNotiRepeatAmount());
-        values.put(COLUMN_NOTIFICATION_TIME_BEFORE, notification.getNotiTimeBefore());
-
-        long newRowId = db.insert(TABLE_NOTIFICATION, null, values);
-        db.close();
-
-        return newRowId;
-    }
-
-    /**
-     * Obtains the list of doctors
-     * @return The list of doctors
-     */
-    public List<Doctor> getAllDoctor(){
-        List<Doctor> doctorList = new ArrayList<>();
-        SQLiteDatabase db = this.getReadableDatabase();
-
-        String[] projection = {
-                COLUMN_DOC_ID, COLUMN_DOCNAME, COLUMN_DOCNUM
-        };
-
-        Cursor cursor = db.query(TABLE_DOCTOR, projection, null, null, null, null, null);
-
-        while(cursor.moveToNext()){
-            long id = cursor.getLong(cursor.getColumnIndex(COLUMN_DOC_ID));
-            String name = cursor.getString(cursor.getColumnIndex(COLUMN_DOCNAME));
-            String docNumber = cursor.getString(cursor.getColumnIndex(COLUMN_DOCNUM));
-
-            Doctor doctor = new Doctor(name, docNumber);
-            doctor.setDocID(id);
-            doctorList.add(doctor);
-        }
-        cursor.close();
-        db.close();
-
-        return doctorList;
-    }
-    /**
      * Retrieves all medicine information in database
-     * @return
+     * @return - List of medicine
      */
     public List<Medicine> getAllMedicines() {
         List<Medicine> medicineList = new ArrayList<>();
@@ -271,69 +191,7 @@ public class MedDatabase extends SQLiteOpenHelper {
 
         return medicineList;
     }
-    /**
-     * Obtains the list of notifications
-     * @return The list of notifications
-     */
-    public List<Notification> getAllNotifications(){
-        List<Notification> notificationList = new ArrayList<>();
-        SQLiteDatabase db = this.getReadableDatabase();
 
-        String[] projection = {
-                COLUMN_NOTIFICATION_ID, COLUMN_MEDICINE_ID, COLUMN_NOTIFICATION_NAME, COLUMN_NOTIFICATION_DATE, COLUMN_NOTIFICATION_TIME,
-                COLUMN_NOTIFICATION_REPEAT_DATE, COLUMN_NOTIFICATION_REPEAT_AMOUNT, COLUMN_NOTIFICATION_TIME_BEFORE,
-        };
-
-        Cursor cursor = db.query(TABLE_NOTIFICATION, projection, null, null, null, null, null);
-
-        while(cursor.moveToNext()){
-            long id = cursor.getLong(cursor.getColumnIndex(COLUMN_NOTIFICATION_ID));
-            long medicineName = cursor.getLong(cursor.getColumnIndex(COLUMN_MEDICINE_ID));
-            String notiName = cursor.getString(cursor.getColumnIndex(COLUMN_NOTIFICATION_NAME));
-            String notiDate = cursor.getString(cursor.getColumnIndex(COLUMN_NOTIFICATION_DATE));
-            String notiTime = cursor.getString(cursor.getColumnIndex(COLUMN_NOTIFICATION_TIME));
-            String notiRepeatDate = cursor.getString(cursor.getColumnIndex(COLUMN_NOTIFICATION_REPEAT_DATE));
-            String notiRepeatAmount = cursor.getString(cursor.getColumnIndex(COLUMN_NOTIFICATION_REPEAT_AMOUNT));
-            String notiTimeBefore = cursor.getString(cursor.getColumnIndex(COLUMN_NOTIFICATION_TIME_BEFORE));
-
-            Notification notification = new Notification(notiName, notiDate, notiTime, notiRepeatDate, notiRepeatAmount,
-                    notiTimeBefore, medicineName);
-            notification.setNotiID(id);
-            notificationList.add(notification);
-        }
-        cursor.close();
-        db.close();
-
-        return notificationList;
-    }
-
-    public long getNotificationByMedicineId(long medicineId) {
-        SQLiteDatabase db = this.getReadableDatabase();
-
-        String[] projection = {
-                COLUMN_NOTIFICATION_ID, COLUMN_MEDICINE_ID
-        };
-
-        String selection = COLUMN_MEDICINE_ID + " = ?";
-        String[] selectionArgs = { String.valueOf(medicineId) };
-
-        Cursor cursor = db.query(TABLE_NOTIFICATION, projection, null, null, null, null, null);
-
-        long notificationId = -1;
-        if (cursor.moveToFirst()) {
-            int columnIndex = cursor.getColumnIndex(COLUMN_NOTIFICATION_ID);
-            if (columnIndex != -1) {
-                notificationId = cursor.getLong(columnIndex);
-            }
-        }
-
-        cursor.close();
-        db.close();
-
-        return notificationId;
-
-    }
-    // Method to update a MedicineDTO object in the database
     /**
      * Edits the medicine information
      * @param id - The ID of the medicine being updated
@@ -363,62 +221,167 @@ public class MedDatabase extends SQLiteOpenHelper {
     }
 
     /**
-     * Edits the notification information
-     * @param id - The ID of the notification being updated
-     * @param notification - The updated notification information
-     * @return - The updated notification information in the database
+     * Retrieves a list of medicine that are currently taken. Expiration or Duration date is not
+     * past Current Date
+     * @return List of current medicine
      */
-    public int updateNotification(long id, Notification notification) {
-        SQLiteDatabase db = this.getWritableDatabase();
+    public List<Medicine> getCurrentMedicines(){
+        List<Medicine> currentMedicineList = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        LocalDate currentDate = LocalDate.now();
 
-        ContentValues values = new ContentValues();
-        values.put(COLUMN_NOTIFICATION_NAME, notification.getNotiName());
-        values.put(COLUMN_NOTIFICATION_DATE, notification.getNotiDate());
-        values.put(COLUMN_NOTIFICATION_TIME, notification.getNotiTime());
-        values.put(COLUMN_NOTIFICATION_REPEAT_DATE, notification.getNotiRepeatDate());
-        values.put(COLUMN_NOTIFICATION_REPEAT_AMOUNT, notification.getNotiRepeatAmount());
-        values.put(COLUMN_NOTIFICATION_TIME_BEFORE, notification.getNotiTimeBefore());
+        String[] projection = {
+                COLUMN_ID, COLUMN_NAME, COLUMN_DOSAGE, COLUMN_QUANTITY, COLUMN_FREQUENCY,
+                COLUMN_REFILL, COLUMN_DURATION, COLUMN_EXPIRATION, COLUMN_INSTRUCTIONS
+        };
 
-        String selection = COLUMN_NOTIFICATION_ID + " = ?";
-        String[] selectionArgs = { String.valueOf(id) };
+        Cursor cursor = db.query(
+                TABLE_MEDICINE, projection, null, null, null, null, null
+        );
 
-        int count = db.update(TABLE_NOTIFICATION, values, selection, selectionArgs);
+        while (cursor.moveToNext()) {
+            String expirationDateString = cursor.getString(cursor.getColumnIndex(COLUMN_EXPIRATION));
+            String durationDateString = cursor.getString(cursor.getColumnIndex(COLUMN_DURATION));
+
+            LocalDate expirationDate = LocalDate.parse(expirationDateString, DateTimeFormatter.ofPattern("yyyy/MM/dd"));
+            LocalDate durationDate = LocalDate.parse(durationDateString, DateTimeFormatter.ofPattern("yyyy/MM/dd"));
+
+            if (currentDate.isBefore(expirationDate) || currentDate.isBefore(durationDate)) {
+                long id = cursor.getLong(cursor.getColumnIndex(COLUMN_ID));
+                String name = cursor.getString(cursor.getColumnIndex(COLUMN_NAME));
+                String dosage = cursor.getString(cursor.getColumnIndex(COLUMN_DOSAGE));
+                String quantity = cursor.getString(cursor.getColumnIndex(COLUMN_QUANTITY));
+                String frequency = cursor.getString(cursor.getColumnIndex(COLUMN_FREQUENCY));
+                String refill = cursor.getString(cursor.getColumnIndex(COLUMN_REFILL));
+                String duration = cursor.getString(cursor.getColumnIndex(COLUMN_DURATION));
+                String expiration = cursor.getString(cursor.getColumnIndex(COLUMN_EXPIRATION));
+                String instructions = cursor.getString(cursor.getColumnIndex(COLUMN_INSTRUCTIONS));
+
+                Medicine medicine = new Medicine(name, dosage, quantity, frequency, refill, duration, expiration, instructions);
+                medicine.setId(id);
+
+                currentMedicineList.add(medicine);
+            }
+        }
+
+        cursor.close();
         db.close();
 
-        return count;
+        return currentMedicineList;
     }
 
     /**
-     * Deletes the medicine based on ID in database
+     * Retrieves all medicines that are expired or in the past
+     * @return List of past medicines
      */
-    public void deleteMedicine(long medicineId) {
+    public List<Medicine> getPastMedicines() {
+        List<Medicine> pastMedicineList = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        LocalDate currentDate = LocalDate.now();
+
+        String[] projection = {
+                COLUMN_ID, COLUMN_NAME, COLUMN_DOSAGE, COLUMN_QUANTITY, COLUMN_FREQUENCY,
+                COLUMN_REFILL, COLUMN_DURATION, COLUMN_EXPIRATION, COLUMN_INSTRUCTIONS
+        };
+
+        Cursor cursor = db.query(
+                TABLE_MEDICINE, projection, null, null, null, null, null
+        );
+
+        while (cursor.moveToNext()) {
+            String expirationDateString = cursor.getString(cursor.getColumnIndex(COLUMN_EXPIRATION));
+            String durationDateString = cursor.getString(cursor.getColumnIndex(COLUMN_DURATION));
+
+            LocalDate expirationDate = LocalDate.parse(expirationDateString, DateTimeFormatter.ofPattern("yyyy/MM/dd"));
+            LocalDate durationDate = LocalDate.parse(durationDateString, DateTimeFormatter.ofPattern("yyyy/MM/dd"));
+
+            if (currentDate.isAfter(expirationDate) || currentDate.isAfter(durationDate)) {
+                long id = cursor.getLong(cursor.getColumnIndex(COLUMN_ID));
+                String name = cursor.getString(cursor.getColumnIndex(COLUMN_NAME));
+                String dosage = cursor.getString(cursor.getColumnIndex(COLUMN_DOSAGE));
+                String quantity = cursor.getString(cursor.getColumnIndex(COLUMN_QUANTITY));
+                String frequency = cursor.getString(cursor.getColumnIndex(COLUMN_FREQUENCY));
+                String refill = cursor.getString(cursor.getColumnIndex(COLUMN_REFILL));
+                String duration = cursor.getString(cursor.getColumnIndex(COLUMN_DURATION));
+                String expiration = cursor.getString(cursor.getColumnIndex(COLUMN_EXPIRATION));
+                String instructions = cursor.getString(cursor.getColumnIndex(COLUMN_INSTRUCTIONS));
+
+                Medicine medicine = new Medicine(name, dosage, quantity, frequency, refill, duration, expiration, instructions);
+                medicine.setId(id);
+
+                pastMedicineList.add(medicine);
+            }
+        }
+
+        cursor.close();
+        db.close();
+
+        return pastMedicineList;
+    }
+
+    /**
+     * Deletes the medicine along with the doctor's information that prescribed it.
+     * @param medicine - The medicine information
+     * @param doctor - The doctors information
+     */
+    public void deleteMedicine(Medicine medicine, Doctor doctor) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         String selection = COLUMN_ID + " = ?";
-        String[] selectionArgs = {String.valueOf(medicineId)};
+        String[] selectionArgs = {String.valueOf(medicine.getId())};
 
         db.delete(TABLE_MEDICINE, selection, selectionArgs);
+
+        deleteDoctor(doctor);
         db.close();
     }
 
     /**
-     * Deletes the notification based on ID in database
+     * Deletes the value associated with doctor
+     * @param doctor
      */
-    public int deleteNotification(Long notificationId) {
-        if (notificationId == null) {
-            // Handle the case where notificationId is null (not found)
-            return -1;
-        }
-
+    private void deleteDoctor(Doctor doctor) {
         SQLiteDatabase db = this.getWritableDatabase();
 
-        String selection = COLUMN_NOTIFICATION_ID + " = ?";
-        String[] selectionArgs = { String.valueOf(notificationId) };
+        String selection = COLUMN_DOC_ID + " = ?";
+        String[] selectionArgs = {String.valueOf(doctor.getDocID())};
 
-        int deletedRows = db.delete(TABLE_NOTIFICATION, selection, selectionArgs);
+        db.delete(TABLE_DOCTOR, selection, selectionArgs);
+
+        db.close();
+    }
+
+    /**
+     * Retrieves the doctor that is linked with the specific medicine.
+     * @param medId - The id of the medicine that is linked with the doctor.
+     * @return - The doctors information that is linked with the medicine.
+     */
+    public Doctor getDoctorForMedicine(long medId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String[] projection = {
+                COLUMN_DOC_ID, COLUMN_DOCNAME, COLUMN_DOCNUM
+        };
+
+        String selection = COLUMN_DOC_ID + " = ?";
+        String[] selectionArgs = {String.valueOf(medId)};
+
+        Cursor cursor = db.query(TABLE_DOCTOR, projection, selection, selectionArgs, null, null, null);
+
+        Doctor doctor = null;
+        if (cursor.moveToFirst()) {
+            long id = cursor.getLong(cursor.getColumnIndex(COLUMN_DOC_ID));
+            String name = cursor.getString(cursor.getColumnIndex(COLUMN_DOCNAME));
+            String docNumber = cursor.getString(cursor.getColumnIndex(COLUMN_DOCNUM));
+
+            doctor = new Doctor(name, docNumber);
+            doctor.setDocID(id);
+        }
+
+        cursor.close();
         db.close();
 
-        return deletedRows;
+        return doctor;
     }
 
     /**
@@ -444,4 +407,34 @@ public class MedDatabase extends SQLiteOpenHelper {
 
         return userExists;
     }
+
+    /**
+     * Retrieves username and password based on the provided passcode.
+     * @param passcode - The passcode entered by user
+     * @return - Array containing username and password if a match is found, or null if no match is found.
+     */
+    public String[] getUsernamePasswordByPasscode(String passcode) {
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String[] projection = {COLUMN_USERNAME, COLUMN_PASSWORD};
+        String selection = COLUMN_PASSCODE + " = ?";
+        String[] selectionArgs = {passcode};
+
+        Cursor cursor = db.query(TABLE_USERS, projection, selection, selectionArgs, null, null, null);
+
+        String[] result = null;
+        if (cursor.moveToFirst()) {
+            result = new String[]{
+                    cursor.getString(cursor.getColumnIndex(COLUMN_USERNAME)),
+                    cursor.getString(cursor.getColumnIndex(COLUMN_PASSWORD))
+            };
+        }
+
+        cursor.close();
+        db.close();
+
+        return result;
+    }
+
+
 }

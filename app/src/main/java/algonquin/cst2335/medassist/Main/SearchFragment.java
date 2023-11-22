@@ -1,13 +1,11 @@
-package algonquin.cst2335.medassist;
+package algonquin.cst2335.medassist.Main;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
-import android.widget.TextView;
 
 import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -16,13 +14,16 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
 
+import algonquin.cst2335.medassist.Medicine.MedDatabase;
+import algonquin.cst2335.medassist.Medicine.Medicine;
+import algonquin.cst2335.medassist.R;
+
 public class SearchFragment extends DialogFragment implements RecyclerViewInterface {
 
     private RecyclerView recyclerView;
     private MedicineAdapter adapter;
     private List<Medicine> searchResults = new ArrayList<>();
     private EditText searchEditText;
-    private TextView noMedicine;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -30,7 +31,6 @@ public class SearchFragment extends DialogFragment implements RecyclerViewInterf
 
         recyclerView = view.findViewById(R.id.searchRecyclerView);
         searchEditText = view.findViewById(R.id.searchMedInput);
-        noMedicine = view.findViewById(R.id.searchNoMedicine);
 
         // Initialize and set up your RecyclerView and adapter here
         adapter = new MedicineAdapter(searchResults, this); // 'this' refers to the SearchFragment
@@ -44,7 +44,11 @@ public class SearchFragment extends DialogFragment implements RecyclerViewInterf
         return view;
     }
 
-    // Implement a method to load search results and update the RecyclerView
+    /**
+     * Loads search results based on the given query and updates the adapter with the results.
+     *
+     * @param query The search query to filter the medicine list.
+     */
     private void loadSearchResults(String query) {
         // Clear the existing search results
         // searchResults.clear();
@@ -66,13 +70,6 @@ public class SearchFragment extends DialogFragment implements RecyclerViewInterf
                 }
             }
         }
-        if (searchResultsList.isEmpty()){
-            noMedicine.setGravity(Gravity.CENTER);
-            noMedicine.setVisibility(View.VISIBLE);
-        }
-        else if (searchResultsList.isEmpty()){
-            noMedicine.setVisibility(View.GONE);
-        }
 
         // Add the search results to the 'searchResults' list
         searchResults.addAll(searchResultsList);
@@ -91,5 +88,15 @@ public class SearchFragment extends DialogFragment implements RecyclerViewInterf
         Intent intent = new Intent(requireContext(), MedicineDetailActivity.class);
         intent.putExtra("medicine", medicine);
         startActivity(intent);
+    }
+
+    @Override
+    public void onMedicineDeleted() {
+
+    }
+
+    @Override
+    public void onMedicineAdded() {
+
     }
 }
