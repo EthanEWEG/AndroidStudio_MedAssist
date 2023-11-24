@@ -9,8 +9,14 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.AlarmManager;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -22,6 +28,7 @@ import android.view.View;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -29,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicReference;
@@ -54,6 +62,9 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
         MedDatabase medDb = new MedDatabase(this);
+
+        //creates the notification channel for this apps notifications
+        createNotificationChannel();
 
         /**
          * On Click Listener Current Tab
@@ -292,6 +303,8 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
 
     }
 
+    //tracks which button was clicked
+    String[] DWMH = {"day"};
 
     public void calendar(View view) {
 
@@ -308,7 +321,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
         Button alertDay = alertView.findViewById(R.id.repeatDayButton);
         Button alertWeek = alertView.findViewById(R.id.repeatWeekButton);
         Button alertMonth = alertView.findViewById(R.id.repeatMonthButton);
-        Button alertYear = alertView.findViewById(R.id.repeatYearButton);
+        Button alertHour = alertView.findViewById(R.id.repeatYearButton);
         ImageButton alertCancel = alertView.findViewById(R.id.cancelButton);
         Spinner alertFrequency = alertView.findViewById(R.id.spinnerFrequency);
         Spinner alertEnd = alertView.findViewById(R.id.spinnerEnd);
@@ -373,19 +386,22 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
         //List options for when the notifications end
         List<String> endOptions = new ArrayList<>();
         endOptions.add("Ends never");
-        // Generate "Ends after 1, 2, 3...120 occurrences"
+        // Generate "Ends after 1, 2, 3...120 rences"
         for (int i = 1; i <= 120; i++) {
-            endOptions.add("Ends after " + i + " occurrences");
+            if (i > 1) {
+                endOptions.add("Ends after " + i + " recurrences");
+            }
+            else{
+                endOptions.add("Ends after " + i + " recurrence");
+            }
         }
 
         //List options for when to receive the notification
-        List<String> freqOptions = new ArrayList<>();
-        String[] alertAlertOptions = {"Event end time", "0 minutes", "1 minute", "5 minutes", "10 minutes", "15 minutes", "20 minutes", "30 minutes", "45 minutes", "60 minutes",
+        String[] alertAlertOptions = {"0 minutes", "1 minute", "5 minutes", "10 minutes", "15 minutes", "20 minutes", "30 minutes", "45 minutes", "60 minutes",
                 "90 minutes", "2 hours", "3 hours", "4 hours", "6 hours", "8 hours", "12 hours", "18 hours", "24 hours", "2 days", "3 days", "5 days", "7 days", "10 days", "14 days", "21 days", "28 days"};
 
-        //String to chose which day week month or year button should display
-        final String[] DWMY = { "day" };
-
+        //List options for when to get repeat notifications
+        List<String> freqOptions = new ArrayList<>();
 
         // Initialize the adapter for alertEnd spinner
         ArrayAdapter<String> endAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, endOptions);
@@ -402,58 +418,64 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
         freqAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         alertFrequency.setAdapter(freqAdapter);
 
-
-        // Nested method to update the frequency options based on DWMY
+        // Nested method to update the frequency options based on DWMH
         Runnable updateFreqOptions = () -> {
             List<String> newFreqOptions = new ArrayList<>();
             newFreqOptions.add("Never");
 
             for (int i = 1; i <= 120; i++) {
-                if (i > 2) {
-                    newFreqOptions.add("Every " + i + " " + DWMY[0] + "s");
+                if (i > 1) {
+                    newFreqOptions.add("Every " + i + " " + DWMH[0] + "s");
                 } else {
-                    newFreqOptions.add("Every " + i + " " + DWMY[0]);
+                    newFreqOptions.add("Every " + i + " " + DWMH[0]);
                 }
             }
 
             freqAdapter.clear(); // Clear the existing data
             freqAdapter.addAll(newFreqOptions); // Add the new data
             alertFrequency.setSelection(1);
-            freqAdapter.notifyDataSetChanged(); // Notify the adapter that the data has changed
         };
 
         // Swaps between repeat day/week/month/year
         alertDay.setOnClickListener(v -> {
-            DWMY[0] = "day";
+            DWMH[0] = "day";
             updateFreqOptions.run();
         });
 
         alertWeek.setOnClickListener(v -> {
-            DWMY[0] = "week";
+            DWMH[0] = "week";
             updateFreqOptions.run();
         });
 
         alertMonth.setOnClickListener(v -> {
-            DWMY[0] = "month";
+            DWMH[0] = "month";
             updateFreqOptions.run();
         });
 
-        alertYear.setOnClickListener(v -> {
-            DWMY[0] = "year";
+        alertHour.setOnClickListener(v -> {
+            DWMH[0] = "hour";
             updateFreqOptions.run();
         });
 
-        //initializes the frequency spinner and sets value to "never" (index 0) to start
-        alertDay.performClick();
-        alertFrequency.setSelection(0);
+        //sets the spinner back to whatever list set it should be.
+        if (DWMH[0].equals("day")){
+            alertDay.performClick();
+        }
+        else if (DWMH[0].equals("week")){
+            alertWeek.performClick();
+        }
+        else if (DWMH[0].equals("month")){
+            alertMonth.performClick();
+        }
+        else if (DWMH[0].equals("hour")){
+            alertHour.performClick();
+        }
 
         //resets alertEnd and alertFreq spinners to "never"
         alertCancel.setOnClickListener(v ->{
             alertFrequency.setSelection(0);
             alertEnd.setSelection(0);
         });
-
-
 
         //tracks if a notification was found in the db
         boolean notificationFound = false;
@@ -469,9 +491,8 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
                 alertTitle.setText(notification.getNotiName());
                 alertDate.setText(notification.getNotiDate());
                 alertTime.setText(notification.getNotiTime());
-                alertTime.setText(notification.getNotiTime());
                 //spinner repeat date
-                for (int i = 0; i <= alertFrequency.getCount(); i++){
+                for (int i = 0; i < alertFrequency.getCount(); i++){
                     Object item = alertFrequency.getItemAtPosition(i);
                     if (item != null && item.equals(notification.getNotiRepeatDate())){
                         alertFrequency.setSelection(i);
@@ -479,7 +500,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
                     }
                 }
                 //spinner repeat occurence
-                for (int i = 0; i <= alertEnd.getCount(); i++){
+                for (int i = 0; i < alertEnd.getCount(); i++){
                     Object item = alertEnd.getItemAtPosition(i);
                     if (item != null && item.equals(notification.getNotiRepeatAmount())){
                         alertEnd.setSelection(i);
@@ -487,7 +508,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
                     }
                 }
                 //spinner for when to receive notification
-                for (int i = 0; i <= alertAlert.getCount(); i++){
+                for (int i = 0; i < alertAlert.getCount(); i++){
                     Object item = alertAlert.getItemAtPosition(i);
                     if (item != null && item.equals(notification.getNotiTimeBefore())){
                         alertAlert.setSelection(i);
@@ -499,8 +520,12 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
                 alertSave.setText("Update");
                 alertCancelNoti.setText("Remove");
 
-                //Button listeners
                 //updates all the notification information (this button would now have the text(update))
+                /**
+                 *
+                 *   UPDATE
+                 *
+                 */
                 alertSave.setOnClickListener(v ->{
 
                     //user information formatted how its needed
@@ -528,6 +553,40 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
                     if (newRowId != -1) {
                         dialog.dismiss();
                         Toast.makeText(this, "Notification "+ notificationName +" updated", Toast.LENGTH_LONG).show();
+
+                        //Cancels the existing PendingIntent
+                        Intent cancelIntent = new Intent(this, ReminderBroadcast.class);
+                        PendingIntent cancelPendingIntent = PendingIntent.getBroadcast(MainActivity.this, Integer.parseInt(medicineId), cancelIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                        AlarmManager cancelAlarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+                        cancelAlarmManager.cancel(cancelPendingIntent);
+
+                        //Creates new pendingIntent for alertManager
+                        Intent intent = new Intent(this, ReminderBroadcast.class);
+                        intent.putExtra("medicineTitle", alertTitle.getText().toString());
+                        intent.putExtra("frequency", medDb.getFrequencyById(medicineID));
+                        PendingIntent pendingIntent = PendingIntent.getBroadcast(MainActivity.this,Integer.parseInt(medicineId),intent,PendingIntent.FLAG_UPDATE_CURRENT);
+
+                        AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+                        long triggerTime = calculateTriggerTime(notificationDate, notificationTime, notificationTimeBefore);
+                        long intervalTime = calculateIntervalTime(notificationRepeatDate);
+                        String[] repeatAmount = notificationRepeatAmount.split("\\s+");
+
+                        if (notificationRepeatDate.equals("Never")) {
+                            alarmManager.set(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent);
+                        }
+                        else if (notificationRepeatAmount.equals("Ends never")){
+                            alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, triggerTime, intervalTime, pendingIntent);
+                        }
+                        else {
+                            alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, triggerTime, intervalTime, pendingIntent);
+
+                            // Cancel the existing PendingIntent after occurences
+                            Intent cancellationIntent = new Intent(this, CancelReminderBroadcast.class);
+                            cancellationIntent.putExtra("key", pendingIntent);
+                            PendingIntent cancellationPendingIntent = PendingIntent.getBroadcast(this, Integer.parseInt(medicineId), cancellationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                            alarmManager.set(AlarmManager.RTC_WAKEUP, triggerTime + intervalTime * Long.parseLong(repeatAmount[2]), cancellationPendingIntent);
+                        }
+
                     } else {
                         // Handle insertion failure
                         Toast.makeText(this, "Failed to updated notification. Please try again.", Toast.LENGTH_LONG).show();
@@ -535,6 +594,11 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
 
                 });
                 //removes the notification (this button would now have the text(remove))
+                /**
+                 *
+                 *  REMOVE
+                 *
+                 */
                 alertCancelNoti.setOnClickListener(v ->{
 
                     //notification name
@@ -554,6 +618,12 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
                     if (newRowId != -1) {
                         dialog.dismiss();
                         Toast.makeText(this, "Notification "+ notificationName +" removed", Toast.LENGTH_LONG).show();
+
+                        // Cancel the existing PendingIntent
+                        Intent cancelIntent = new Intent(this, ReminderBroadcast.class);
+                        PendingIntent cancelPendingIntent = PendingIntent.getBroadcast(MainActivity.this, Integer.parseInt(medicineId), cancelIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                        AlarmManager cancelAlarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+                        cancelAlarmManager.cancel(cancelPendingIntent);
                     } else {
                         // Handle insertion failure
                         Toast.makeText(this, "Failed to remove notification. Please try again.", Toast.LENGTH_LONG).show();
@@ -565,6 +635,11 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
             }
         }
 
+        /**
+         *
+         * NEW NOTIFICATION
+         *
+         */
         if (!notificationFound){
             //setting of initial values
 
@@ -590,10 +665,16 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
             alertTime.setText(timeFormat.format(currentDateTime.getTime()));
 
             //sets the default value to 15 minutes (index 5)
-            alertAlert.setSelection(5);
+            alertAlert.setSelection(4);
 
-            //Button listeners
-            //saves all the notification information
+            alertDay.performClick();
+            alertFrequency.setSelection(0);
+
+            /**
+             *
+             *  SAVE
+             *
+             */
             alertSave.setOnClickListener(v ->{
 
                 //user information formatted how its needed
@@ -617,6 +698,32 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
                 if (newRowId != -1) {
                     dialog.dismiss();
                     Toast.makeText(this, "Notification "+ notificationName +" added", Toast.LENGTH_LONG).show();
+
+                    Intent intent = new Intent(this, ReminderBroadcast.class);
+                    intent.putExtra("medicineTitle", alertTitle.getText().toString());
+                    intent.putExtra("frequency", medDb.getFrequencyById(medicineID));
+                    PendingIntent pendingIntent = PendingIntent.getBroadcast(MainActivity.this,Integer.parseInt(medicineId),intent,PendingIntent.FLAG_UPDATE_CURRENT);
+
+                    AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+                    long triggerTime = calculateTriggerTime(notificationDate, notificationTime, notificationTimeBefore);
+                    long intervalTime = calculateIntervalTime(notificationRepeatDate);
+                    String[] repeatAmount = notificationRepeatAmount.split("\\s+");
+
+                    if (notificationRepeatDate.equals("Never")) {
+                        alarmManager.set(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent);
+                    }
+                    else if (notificationRepeatAmount.equals("Ends never")){
+                        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, triggerTime, intervalTime, pendingIntent);
+                    }
+                    else {
+                        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, triggerTime, intervalTime, pendingIntent);
+
+                        // Cancel the existing PendingIntent after occurences
+                        Intent cancellationIntent = new Intent(this, CancelReminderBroadcast.class);
+                        cancellationIntent.putExtra("key", pendingIntent);
+                        PendingIntent cancellationPendingIntent = PendingIntent.getBroadcast(this, Integer.parseInt(medicineId), cancellationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                        alarmManager.set(AlarmManager.RTC_WAKEUP, triggerTime + intervalTime * Long.parseLong(repeatAmount[2]), cancellationPendingIntent);
+                    }
                 } else {
                     // Handle insertion failure
                     Toast.makeText(this, "Failed to add notification. Please try again.", Toast.LENGTH_LONG).show();
@@ -624,9 +731,15 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
 
             });
 
+            /**
+             *
+             * CANCEL
+             *
+             */
             alertCancelNoti.setOnClickListener(v ->{
 
                 dialog.dismiss();
+                //nothing happens
 
             });
 
@@ -647,6 +760,92 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
 
         dialog.show();
 
+    }
+
+    private void createNotificationChannel(){
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+            CharSequence name = "MedReminderChannel";
+            String description = "Channel for MedAssist reminders";
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel("notifyMed",name,importance);
+            channel.setDescription(description);
+
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
+    }
+
+    private long calculateIntervalTime(String intervalTime){
+        long time = 0;
+        String[] splitTime = intervalTime.split("\\s+");
+
+        if (splitTime.length != 3) {
+            //Invalid format
+            return -1;
+        }
+
+        if (splitTime[2].equals("hours") || splitTime[2].equals("hour")){
+            time = Long.parseLong(splitTime[1])/* * 60 */* 60 * 1000;
+        }
+        else if (splitTime[2].equals("days") || splitTime[1].equals("day")){
+            time = Long.parseLong(splitTime[1]) * 24 * 60 * 60 * 1000;
+        }
+        else if (splitTime[2].equals("weeks") || splitTime[1].equals("week")){
+            time = Long.parseLong(splitTime[1]) * 7 * 24 * 60 * 60 * 1000;
+        }
+        // technically this could be made more accurate because each month isnt 30 days
+        else if (splitTime[2].equals("months") || splitTime[1].equals("month")){
+            time = Long.parseLong(splitTime[1]) * 30 * 7 * 24 * 60 * 60 * 1000;
+        }
+
+        return time;
+    }
+
+    private long calculateTriggerTime(String date, String time, String timeBefore){
+
+        // Combine date and time strings to create the complete dateTime string
+        String dateTimeString = date + " " + time;
+
+        // Parse the dateTime string
+        SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy/MM/dd hh:mm a", Locale.getDefault());
+        Date dateTime;
+        try {
+            dateTime = dateTimeFormat.parse(dateTimeString);
+        } catch (ParseException e) {
+            e.printStackTrace();
+            // Handle parsing error
+            return -1; // Return an invalid value in case of error
+        }
+
+        // Calculate the trigger time by subtracting timeBefore in milliseconds
+        long triggerTimeMillis = dateTime.getTime() - convertTimeBeforeToMillis(timeBefore);
+
+        return triggerTimeMillis;
+
+    }
+
+    //This method is used to calculate how much time to send the notification before hand
+    private long convertTimeBeforeToMillis(String timeBefore) {
+        long time = 0;
+        String[] splitTime = timeBefore.split("\\s+");
+
+        if (splitTime.length != 2) {
+            //Invalid format
+            return -1;
+        }
+
+        if (splitTime[1].equals("minutes") || splitTime[1].equals("minute")){
+            time = Long.parseLong(splitTime[0]) * 60 * 1000;
+        }
+        else if (splitTime[1].equals("hours")){
+            time = Long.parseLong(splitTime[0]) * 60 * 60 * 1000;
+        }
+        else if (splitTime[1].equals("days")){
+            time = Long.parseLong(splitTime[0]) * 24 * 60 * 60 * 1000;
+        }
+
+        return time;
     }
 
 }

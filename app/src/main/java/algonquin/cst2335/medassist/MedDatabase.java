@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -271,6 +272,39 @@ public class MedDatabase extends SQLiteOpenHelper {
 
         return medicineList;
     }
+
+    /**
+     * Retrieve frequency based on medicine ID
+     * @param medicineId - The ID of the medicine
+     * @return - The frequency of the medicine with the given ID, or null if not found
+     */
+    public String getFrequencyById(long medicineId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String[] projection = {
+                COLUMN_FREQUENCY
+        };
+
+        String selection = COLUMN_ID + " = ?";
+        String[] selectionArgs = {String.valueOf(medicineId)};
+
+        Cursor cursor = db.query(TABLE_MEDICINE, projection, selection, selectionArgs, null, null, null);
+
+        String frequency = null;
+
+        if (cursor.moveToFirst()) {
+            int columnIndex = cursor.getColumnIndex(COLUMN_FREQUENCY);
+            if (columnIndex != -1) {
+                frequency = cursor.getString(columnIndex);
+            }
+        }
+
+        cursor.close();
+        db.close();
+
+        return frequency;
+    }
+
     /**
      * Obtains the list of notifications
      * @return The list of notifications
@@ -358,7 +392,6 @@ public class MedDatabase extends SQLiteOpenHelper {
 
         int count = db.update(TABLE_MEDICINE, values, selection, selectionArgs);
         db.close();
-
         return count;
     }
 

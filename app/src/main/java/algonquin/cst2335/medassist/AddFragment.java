@@ -141,7 +141,7 @@ public class AddFragment extends DialogFragment{
 
         return view;
     }
-    private boolean isInputValid(String medName, String dosage, String quantity, String frequency, String refills, String duration, String expiration, String instructions, String docName, String docNumber){
+    public boolean isInputValid(String medName, String dosage, String quantity, String frequency, String refills, String duration, String expiration, String instructions, String docName, String docNumber){
 //        return !medName.isEmpty() && !dosage.isEmpty() && !quantity.isEmpty() && !frequency.isEmpty() && !refills.isEmpty() && !duration.isEmpty() && !expiration.isEmpty() && !instructions.isEmpty();
         String[] fields = {"Medication Name", "Dosage", "Quantity", "Frequency", "Refills", "Duration", "Expiration","Doctor Name", "Doctor Number"};
         int empFieldCount = 0;
@@ -189,7 +189,7 @@ public class AddFragment extends DialogFragment{
         }
     }
 
-    private boolean isValidDate(String date){
+    public boolean isValidDate(String date){
         if(date.matches("\\d{4}/\\d{2}/\\d{2}")){
             try{
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
