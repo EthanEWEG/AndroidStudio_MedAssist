@@ -56,15 +56,17 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
         MedDatabase medDb = new MedDatabase(this);
+        /**===INSERT FAKE PAST MEDICINE============*/
 //        Medicine pastMedicine = new Medicine("Nicotine", "500", "200", "1", "0", "2019/12/31", "2019/12/31", "");
 //        Doctor pastDoc = new Doctor("Dr.Go", "0987654321");
 //        medDb.insertMedicine(pastMedicine, pastDoc);
 //        Medicine pastMedicine1 = new Medicine("Meth", "1000", "200", "5", "0", "2018/12/31", "2018/12/31", "");
-//        Doctor pastDoc1 = new Doctor("Dr.Go", "1223334444");
+//        Doctor pastDoc1 = new Doctor("Dr.Lo", "1223334444");
 //        medDb.insertMedicine(pastMedicine1, pastDoc1);
 //        Medicine pastMedicine2 = new Medicine("Caffeine", "5000", "100", "3", "0", "2020/12/31", "2020/12/31", "");
-//        Doctor pastDoc2 = new Doctor("Dr.Go", "1223334444");
+//        Doctor pastDoc2 = new Doctor("Dr.No", "2342348112");
 //        medDb.insertMedicine(pastMedicine2, pastDoc2);
+        /**===INSERT FAKE PAST MEDICINE============*/
         setCurrentMedicineAdapter();
 
 
@@ -84,6 +86,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
             isAddFragmentVisible = false;
             isSearchFragmentVisible = false;
 
+            //To determine which tab is shown. Needed to retrieve correct med info
             currentTabId = R.id.current;
             AtomicReference<MedicineAdapter> adapter = new AtomicReference<>(new MedicineAdapter(medDb.getCurrentMedicines(), this));
             recyclerView.setAdapter(adapter.get());

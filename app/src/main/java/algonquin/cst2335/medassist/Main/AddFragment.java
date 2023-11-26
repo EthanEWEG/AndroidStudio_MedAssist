@@ -77,6 +77,7 @@ public class AddFragment extends DialogFragment{
         binding.submitButton.setOnClickListener(click ->
         {
             // Retrieve user input for Medicine Name, Dosage, Quantity, Frequency, Refills, Duration, Expiration date, and special instructions
+
             String medName = binding.editMedName.getText().toString();
             String dosage = binding.editDosage.getText().toString();
             String quantity = binding.editQuantity.getText().toString();
@@ -88,16 +89,34 @@ public class AddFragment extends DialogFragment{
             String docNumber = binding.editDocNumber.getText().toString();
             String instructions = binding.editInstructions.getText().toString();
 
-            if (instructions.isEmpty()){
-                instructions = "No special Instructions were specified";
+            String[] values = {medName, dosage, quantity, frequency, refills, duration, expiration, docName, docNumber, instructions};
+            for (int i = 1; i < values.length; i++) {
+                    if(values[1].isEmpty() || values[2].isEmpty() || values[3].isEmpty() || values[4].isEmpty()){
+                        values[i] = "0";
+                    }
+                    if(i == 7 && values[i].isEmpty()){
+                        values[7] = "No Doctor was provided";
+                    }
+                    if(i == 8 && values[i].isEmpty()){
+                        values[8] = "No phone number provided";
+                    }
+                    if (i == 9 && values[9].isEmpty()){
+                        values[9] = "No special Instructions were specified";
+                    }
+
             }
-            docNumber = validateAndFormatPhoneNumber(docNumber);
-            if(isValidDate(duration, true) && isValidDate(expiration, true)) {
+            if(duration.isEmpty()){
+                duration = expiration;
+            }
+//
+            if (isInputValid(medName, expiration)){
+            //if(isValidDate(duration, true) && isValidDate(expiration, true)) {
                 // Create a Medicine object with user input
                 Medicine newMedicine = new Medicine(medName, dosage, quantity, frequency, refills, duration, expiration, instructions);
                 Doctor newDoc = new Doctor(docName, docNumber);
 
-                if (isInputValid(medName, dosage, quantity, frequency, refills, duration, expiration, instructions, docName, docNumber)) {
+                if(isValidDate(expiration, true)) {
+                //if (isInputValid(medName, expiration)) {
                     // Insert the new medicine into the database
                     MedDatabase medDb = new MedDatabase(requireContext());
 
@@ -116,11 +135,12 @@ public class AddFragment extends DialogFragment{
                         // Handle insertion failure
                         Toast.makeText(requireContext(), "Failed to add medicine. Please try again.", Toast.LENGTH_LONG).show();
                     }
+                } else{
+                    Toast.makeText(requireContext(), "Please Double check your date values.", Toast.LENGTH_LONG).show();
                 }
 
-            } else {
-                Toast.makeText(requireContext(), "Double check your month and day. Date cannot be before current date.", Toast.LENGTH_LONG).show();
             }
+            callMainActivityMethod();
         });
 
         return view;
@@ -145,24 +165,16 @@ public class AddFragment extends DialogFragment{
     /**
      * Checks to see if each input is valid
      * @param medName - Name of medicine
-     * @param dosage - Dosage of Medicine
-     * @param quantity - The amount to intake
-     * @param frequency - How often medicine should be taken
-     * @param refills - The amount of refills
-     * @param duration - The duration of medication
      * @param expiration - The expiration of medicine
-     * @param instructions - Special instructions for intake of medicine. E.g., Take with food
-     * @param docName - Name of Doctor
-     * @param docNumber - Phone Number of Doctor
      * @return
      */
-    private boolean isInputValid(String medName, String dosage, String quantity, String frequency, String refills, String duration, String expiration, String instructions, String docName, String docNumber){
+    private boolean isInputValid(String medName, String expiration){
 
-        String[] fields = {"Medication Name", "Dosage", "Quantity", "Frequency", "Refills", "Duration", "Expiration","Doctor Name", "Doctor Number"};
+        String[] fields = {"Medication Name", "Expiration"};
         int empFieldCount = 0;
 
         for(int i = 0; i < fields.length;i++){
-            String value = getValueByIndex(i, medName, dosage, quantity, frequency, refills, duration, expiration, instructions, docName, docNumber);
+            String value = getValueByIndex(i, medName, expiration);
 
             if (value.isEmpty()) {
                 Toast.makeText(requireContext(), "Please enter " + fields[i] + " value.", Toast.LENGTH_LONG).show();
@@ -170,7 +182,7 @@ public class AddFragment extends DialogFragment{
             }
 
             if (empFieldCount > 0) {
-                Toast.makeText(requireContext(), "Double check all fields have been entered correctly.", Toast.LENGTH_LONG).show();
+                Toast.makeText(requireContext(), "Please enter values for Medicine Name and Expiration Date", Toast.LENGTH_LONG).show();
                 return false;
             }
         }
@@ -181,39 +193,16 @@ public class AddFragment extends DialogFragment{
      * Obtains the value of each field and checks to see if it is empty. Else, it will return value.
      * @param index - The ID
      * @param medName - The name of medicine
-     * @param dosage - The dosage of medicine
-     * @param quantity - The amount of medicine
-     * @param frequency - The frequency of intaking medicine
-     * @param refills - The amount of refills needed
-     * @param duration - The duration of medication
      * @param expiration - The expiration of medicine
-     * @param instructions - Special instructions for medication. E.g., Take with food
-     * @param docName - Name of Doctor
-     * @param docNumber - Phone Number of Doctor
+
      * @return - Values for each textField
      */
-    private String getValueByIndex(int index, String medName, String dosage, String quantity, String frequency, String refills, String duration, String expiration, String instructions, String docName, String docNumber) {
+    private String getValueByIndex(int index, String medName, String expiration) {
         switch (index) {
             case 0:
                 return medName;
             case 1:
-                return dosage;
-            case 2:
-                return quantity;
-            case 3:
-                return frequency;
-            case 4:
-                return refills;
-            case 5:
-                return duration;
-            case 6:
                 return expiration;
-            case 7:
-                return instructions;
-            case 8:
-                return docName;
-            case 9:
-                return docNumber;
             default:
                 return "";
         }
@@ -234,7 +223,7 @@ public class AddFragment extends DialogFragment{
                 sdf.setLenient(false);
                 Date parsedDate = sdf.parse(date);
 
-                if (checkDateValidity(parsedDate) && (checkValidity || checkDateIsAfterToday(parsedDate))) {
+                if (checkDateValidity(parsedDate) && (checkValidity && checkDateIsAfterToday(parsedDate))) {
                     return true;
                 }
             } catch (DateTimeParseException | ParseException e) {
@@ -383,5 +372,12 @@ public class AddFragment extends DialogFragment{
                 }
             }
     );
+
+    private void callMainActivityMethod() {
+        if (getActivity() instanceof MainActivity) {
+            MainActivity mainActivity = (MainActivity) getActivity();
+            mainActivity.setCurrentMedicineAdapter();
+        }
+    }
 
 }

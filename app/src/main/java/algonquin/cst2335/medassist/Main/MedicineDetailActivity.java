@@ -62,7 +62,7 @@ public class MedicineDetailActivity extends AppCompatActivity {
             if (recyclerViewInterface != null) {
                 recyclerViewInterface.onMedicineDeleted();
             }
-            new Handler().postDelayed(() -> finish(), 10000);
+            new Handler().postDelayed(() -> finish(), 7000);
         });
     }
 

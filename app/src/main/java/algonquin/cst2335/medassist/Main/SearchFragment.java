@@ -2,6 +2,8 @@ package algonquin.cst2335.medassist.Main;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
 
+import algonquin.cst2335.medassist.Medicine.Doctor;
 import algonquin.cst2335.medassist.Medicine.MedDatabase;
 import algonquin.cst2335.medassist.Medicine.Medicine;
 import algonquin.cst2335.medassist.R;
@@ -25,6 +28,8 @@ public class SearchFragment extends DialogFragment implements RecyclerViewInterf
     private List<Medicine> searchResults = new ArrayList<>();
     private EditText searchEditText;
 
+    private MedDatabase medDb;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.search_fragment, container, false);
@@ -32,14 +37,34 @@ public class SearchFragment extends DialogFragment implements RecyclerViewInterf
         recyclerView = view.findViewById(R.id.searchRecyclerView);
         searchEditText = view.findViewById(R.id.searchMedInput);
 
+       medDb = new MedDatabase(requireContext());
+        List<Medicine> medicineList = medDb.getAllMedicines();
+        searchResults.addAll(medicineList);
+
         // Initialize and set up your RecyclerView and adapter here
         adapter = new MedicineAdapter(searchResults, this); // 'this' refers to the SearchFragment
 
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerView.setAdapter(adapter);
 
-        // Implement a method to load search results and update the RecyclerView
-        loadSearchResults("");
+        // Add a TextWatcher to the searchEditText to listen for changes in the text
+        searchEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                // Not needed in this case
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                // Call loadSearchResults with the updated query
+                loadSearchResults(charSequence.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                // Not needed in this case
+            }
+        });
 
         return view;
     }
@@ -71,8 +96,6 @@ public class SearchFragment extends DialogFragment implements RecyclerViewInterf
             }
         }
 
-        // Add the search results to the 'searchResults' list
-        searchResults.addAll(searchResultsList);
 
         // Notify the adapter that the data has changed
         adapter.notifyDataSetChanged();
@@ -81,12 +104,12 @@ public class SearchFragment extends DialogFragment implements RecyclerViewInterf
 
     @Override
     public void onItemClick(int position, View v) {
-        MedDatabase medDb = new MedDatabase(requireContext());
-        List<Medicine> medList = medDb.getAllMedicines();
-        Medicine medicine = medList.get(position);
+        Medicine selectedMedicine = searchResults.get(position);
 
+        Doctor linkedDoctor = medDb.getDoctorForMedicine(selectedMedicine.getId());
         Intent intent = new Intent(requireContext(), MedicineDetailActivity.class);
-        intent.putExtra("medicine", medicine);
+        intent.putExtra("medicine", selectedMedicine);
+        intent.putExtra("doctor", linkedDoctor);
         startActivity(intent);
     }
 
