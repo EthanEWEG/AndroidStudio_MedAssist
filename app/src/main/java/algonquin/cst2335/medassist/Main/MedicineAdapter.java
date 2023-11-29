@@ -3,6 +3,7 @@ package algonquin.cst2335.medassist.Main;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -55,6 +56,7 @@ public class MedicineAdapter extends RecyclerView.Adapter<MedicineAdapter.Medici
         holder.dosage.setText(medicine.getDosage());
         holder.frequency.setText(medicine.getFrequency());
         holder.quantity.setText(medicine.getQuantity());
+        holder.calendarIcon.setTag(R.id.medicineID, medicine.getId());
 
     }
 
@@ -76,6 +78,7 @@ public class MedicineAdapter extends RecyclerView.Adapter<MedicineAdapter.Medici
         TextView dosage;
         TextView frequency;
         TextView quantity;
+        ImageButton calendarIcon;
         View calendar;
 
         /**
@@ -90,6 +93,9 @@ public class MedicineAdapter extends RecyclerView.Adapter<MedicineAdapter.Medici
             frequency = itemView.findViewById(R.id.frequency);
             quantity = itemView.findViewById(R.id.quantity);
             calendar = itemView.findViewById(R.id.calendarIcon);
+            calendarIcon = itemView.findViewById(R.id.calendarIcon);
+            calendar = itemView.findViewById(R.id.calendarIcon);
+
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override

@@ -25,6 +25,8 @@ public class MedicineDetailActivity extends AppCompatActivity {
     private Medicine medicineToUpdate;
     private Medicine originalMedicine;
 
+    private Doctor docToUpdate;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -216,6 +218,9 @@ public class MedicineDetailActivity extends AppCompatActivity {
         // Create a Medicine object with updated values
         medicineToUpdate = new Medicine(medName, dosage, quantity, frequency, refills, duration, expiration, instructions);
         medicineToUpdate.setId(medicineId);
+
+        docToUpdate = new Doctor(docName, docNumber);
+
         //todo missing updateDocotor.
 
         // Call the method from MedDatabase to update the record
