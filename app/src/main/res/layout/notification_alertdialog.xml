@@ -178,7 +178,7 @@
             android:layout_height="wrap_content"
             android:background="@drawable/menu_border_right"
             app:backgroundTint="@null"
-            android:text="Year"
+            android:text="Hour"
             android:textColor="@color/black"
             android:textSize="14sp"
             android:paddingLeft="0dp"

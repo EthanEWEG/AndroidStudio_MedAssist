@@ -52,6 +52,19 @@ public class MedDatabase extends SQLiteOpenHelper {
      * @param context - The context used to create or open the database.
      *                  Typically, this is the application context.
      */
+    private static final String TABLE_NOTIFICATION = "notification";
+    private static final String COLUMN_NOTIFICATION_ID = "noti_id";
+    private static final String COLUMN_NOTIFICATION_NAME = "noti_name";
+    private static final String COLUMN_NOTIFICATION_DATE = "noti_date";
+    private static final String COLUMN_NOTIFICATION_TIME = "noti_time";
+    private static final String COLUMN_NOTIFICATION_REPEAT_DATE = "noti_repeat_date";
+    private static final String COLUMN_NOTIFICATION_REPEAT_AMOUNT = "noti_repeat_amount";
+    private static final String COLUMN_NOTIFICATION_TIME_BEFORE = "noti_time_before";
+    private static final String COLUMN_MEDICINE_ID = "medicine_id";
+
+
+
+
     public MedDatabase(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
@@ -90,6 +103,19 @@ public class MedDatabase extends SQLiteOpenHelper {
                 COLUMN_DOCNUM + " TEXT" +
                 ")";
         db.execSQL(createDoctorTableSQL);
+
+        String createNotificationTableSQL = "CREATE TABLE " + TABLE_NOTIFICATION + " (" +
+                COLUMN_NOTIFICATION_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+                COLUMN_MEDICINE_ID + " INTEGER," +
+                COLUMN_NOTIFICATION_NAME + " TEXT," +
+                COLUMN_NOTIFICATION_DATE + " TEXT," +
+                COLUMN_NOTIFICATION_TIME + " TEXT," +
+                COLUMN_NOTIFICATION_REPEAT_DATE + " TEXT," +
+                COLUMN_NOTIFICATION_REPEAT_AMOUNT + " TEXT," +
+                COLUMN_NOTIFICATION_TIME_BEFORE + " TEXT," +
+                "FOREIGN KEY (" + COLUMN_MEDICINE_ID + ") REFERENCES " + TABLE_MEDICINE + "(" + COLUMN_MEDICINE_ID + ")" +
+                ")";
+        db.execSQL(createNotificationTableSQL);
     }
 
     @Override
@@ -193,6 +219,101 @@ public class MedDatabase extends SQLiteOpenHelper {
         return medicineList;
     }
 
+    /**
+     * Retrieve frequency based on medicine ID
+     * @param medicineId - The ID of the medicine
+     * @return - The frequency of the medicine with the given ID, or null if not found
+     */
+    public String getFrequencyById(long medicineId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String[] projection = {
+                COLUMN_FREQUENCY
+        };
+
+        String selection = COLUMN_ID + " = ?";
+        String[] selectionArgs = {String.valueOf(medicineId)};
+
+        Cursor cursor = db.query(TABLE_MEDICINE, projection, selection, selectionArgs, null, null, null);
+
+        String frequency = null;
+
+        if (cursor.moveToFirst()) {
+            int columnIndex = cursor.getColumnIndex(COLUMN_FREQUENCY);
+            if (columnIndex != -1) {
+                frequency = cursor.getString(columnIndex);
+            }
+        }
+
+        cursor.close();
+        db.close();
+
+        return frequency;
+    }
+
+    /**
+     * Obtains the list of notifications
+     * @return The list of notifications
+     */
+    public List<Notification> getAllNotifications(){
+        List<Notification> notificationList = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String[] projection = {
+                COLUMN_NOTIFICATION_ID, COLUMN_MEDICINE_ID, COLUMN_NOTIFICATION_NAME, COLUMN_NOTIFICATION_DATE, COLUMN_NOTIFICATION_TIME,
+                COLUMN_NOTIFICATION_REPEAT_DATE, COLUMN_NOTIFICATION_REPEAT_AMOUNT, COLUMN_NOTIFICATION_TIME_BEFORE,
+        };
+
+        Cursor cursor = db.query(TABLE_NOTIFICATION, projection, null, null, null, null, null);
+
+        while(cursor.moveToNext()){
+            long id = cursor.getLong(cursor.getColumnIndex(COLUMN_NOTIFICATION_ID));
+            long medicineName = cursor.getLong(cursor.getColumnIndex(COLUMN_MEDICINE_ID));
+            String notiName = cursor.getString(cursor.getColumnIndex(COLUMN_NOTIFICATION_NAME));
+            String notiDate = cursor.getString(cursor.getColumnIndex(COLUMN_NOTIFICATION_DATE));
+            String notiTime = cursor.getString(cursor.getColumnIndex(COLUMN_NOTIFICATION_TIME));
+            String notiRepeatDate = cursor.getString(cursor.getColumnIndex(COLUMN_NOTIFICATION_REPEAT_DATE));
+            String notiRepeatAmount = cursor.getString(cursor.getColumnIndex(COLUMN_NOTIFICATION_REPEAT_AMOUNT));
+            String notiTimeBefore = cursor.getString(cursor.getColumnIndex(COLUMN_NOTIFICATION_TIME_BEFORE));
+
+            Notification notification = new Notification(notiName, notiDate, notiTime, notiRepeatDate, notiRepeatAmount,
+                    notiTimeBefore, medicineName);
+            notification.setNotiID(id);
+            notificationList.add(notification);
+        }
+        cursor.close();
+        db.close();
+
+        return notificationList;
+    }
+
+    public long getNotificationByMedicineId(long medicineId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String[] projection = {
+                COLUMN_NOTIFICATION_ID, COLUMN_MEDICINE_ID
+        };
+
+        String selection = COLUMN_MEDICINE_ID + " = ?";
+        String[] selectionArgs = { String.valueOf(medicineId) };
+
+        Cursor cursor = db.query(TABLE_NOTIFICATION, projection, null, null, null, null, null);
+
+        long notificationId = -1;
+        if (cursor.moveToFirst()) {
+            int columnIndex = cursor.getColumnIndex(COLUMN_NOTIFICATION_ID);
+            if (columnIndex != -1) {
+                notificationId = cursor.getLong(columnIndex);
+            }
+        }
+
+        cursor.close();
+        db.close();
+
+        return notificationId;
+
+    }
+    // Method to update a MedicineDTO object in the database
     /**
      * Edits the medicine information
      * @param id - The ID of the medicine being updated
@@ -437,5 +558,50 @@ public class MedDatabase extends SQLiteOpenHelper {
         return result;
     }
 
+    /**
+     * Deletes the notification based on ID in database
+     */
+    public int deleteNotification(Long notificationId) {
+        if (notificationId == null) {
+            // Handle the case where notificationId is null (not found)
+            return -1;
+        }
+
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        String selection = COLUMN_NOTIFICATION_ID + " = ?";
+        String[] selectionArgs = { String.valueOf(notificationId) };
+
+        int deletedRows = db.delete(TABLE_NOTIFICATION, selection, selectionArgs);
+        db.close();
+
+        return deletedRows;
+    }
+
+    /**
+     * Edits the notification information
+     * @param id - The ID of the notification being updated
+     * @param notification - The updated notification information
+     * @return - The updated notification information in the database
+     */
+    public int updateNotification(long id, Notification notification) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_NOTIFICATION_NAME, notification.getNotiName());
+        values.put(COLUMN_NOTIFICATION_DATE, notification.getNotiDate());
+        values.put(COLUMN_NOTIFICATION_TIME, notification.getNotiTime());
+        values.put(COLUMN_NOTIFICATION_REPEAT_DATE, notification.getNotiRepeatDate());
+        values.put(COLUMN_NOTIFICATION_REPEAT_AMOUNT, notification.getNotiRepeatAmount());
+        values.put(COLUMN_NOTIFICATION_TIME_BEFORE, notification.getNotiTimeBefore());
+
+        String selection = COLUMN_NOTIFICATION_ID + " = ?";
+        String[] selectionArgs = { String.valueOf(id) };
+
+        int count = db.update(TABLE_NOTIFICATION, values, selection, selectionArgs);
+        db.close();
+
+        return count;
+    }
 
 }

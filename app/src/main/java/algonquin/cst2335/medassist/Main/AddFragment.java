@@ -2,19 +2,24 @@ package algonquin.cst2335.medassist.Main;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.camera.lifecycle.ProcessCameraProvider;
+import androidx.camera.view.PreviewView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.DialogFragment;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
@@ -23,17 +28,19 @@ import java.text.SimpleDateFormat;
 import java.time.format.DateTimeParseException;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import algonquin.cst2335.medassist.Medicine.Doctor;
 import algonquin.cst2335.medassist.Medicine.MedDatabase;
 import algonquin.cst2335.medassist.Medicine.Medicine;
 import algonquin.cst2335.medassist.databinding.AddFragmentBinding;
+import algonquin.cst2335.medassist.databinding.MedViewBinding;
 
 import android.content.pm.PackageManager;
 import android.Manifest;
 import android.widget.Toast;
-
+import androidx.lifecycle.LifecycleOwner;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
@@ -77,7 +84,6 @@ public class AddFragment extends DialogFragment{
         binding.submitButton.setOnClickListener(click ->
         {
             // Retrieve user input for Medicine Name, Dosage, Quantity, Frequency, Refills, Duration, Expiration date, and special instructions
-
             String medName = binding.editMedName.getText().toString();
             String dosage = binding.editDosage.getText().toString();
             String quantity = binding.editQuantity.getText().toString();
