@@ -1,4 +1,4 @@
-package algonquin.cst2335.medassist;
+package algonquin.cst2335.medassist.Main;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -7,6 +7,8 @@ import android.content.Context;
 import android.content.Intent;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+
+import algonquin.cst2335.medassist.R;
 
 public class ReminderBroadcast extends BroadcastReceiver {
     @Override

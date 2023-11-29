@@ -1,5 +1,6 @@
 package algonquin.cst2335.medassist.Medicine;
 
+import android.app.Notification;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -11,6 +12,9 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+
+import algonquin.cst2335.medassist.Main.NotificationMed;
+
 @SuppressWarnings("Range")
 public class MedDatabase extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "medicine_db";
@@ -255,8 +259,8 @@ public class MedDatabase extends SQLiteOpenHelper {
      * Obtains the list of notifications
      * @return The list of notifications
      */
-    public List<Notification> getAllNotifications(){
-        List<Notification> notificationList = new ArrayList<>();
+    public List<NotificationMed> getAllNotifications(){
+        List<NotificationMed> notificationList = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
 
         String[] projection = {
@@ -276,7 +280,7 @@ public class MedDatabase extends SQLiteOpenHelper {
             String notiRepeatAmount = cursor.getString(cursor.getColumnIndex(COLUMN_NOTIFICATION_REPEAT_AMOUNT));
             String notiTimeBefore = cursor.getString(cursor.getColumnIndex(COLUMN_NOTIFICATION_TIME_BEFORE));
 
-            Notification notification = new Notification(notiName, notiDate, notiTime, notiRepeatDate, notiRepeatAmount,
+            NotificationMed notification = new NotificationMed(notiName, notiDate, notiTime, notiRepeatDate, notiRepeatAmount,
                     notiTimeBefore, medicineName);
             notification.setNotiID(id);
             notificationList.add(notification);
@@ -460,7 +464,7 @@ public class MedDatabase extends SQLiteOpenHelper {
 
     /**
      * Deletes the value associated with doctor
-     * @param doctor
+     * @param doctor The information of Doctor to be deleted
      */
     private void deleteDoctor(Doctor doctor) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -584,7 +588,7 @@ public class MedDatabase extends SQLiteOpenHelper {
      * @param notification - The updated notification information
      * @return - The updated notification information in the database
      */
-    public int updateNotification(long id, Notification notification) {
+    public int updateNotification(long id, NotificationMed notification) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
@@ -602,6 +606,29 @@ public class MedDatabase extends SQLiteOpenHelper {
         db.close();
 
         return count;
+    }
+
+    /**
+     * Insert Notifications's information (date,time,repeatdate,repeatamount,beforetime)
+     * @param notification - all notification details
+     * @return The ID of the Notifications information
+     */
+    public long insertNotification(NotificationMed notification){
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_MEDICINE_ID, notification.getMedicineId());
+        values.put(COLUMN_NOTIFICATION_NAME, notification.getNotiName());
+        values.put(COLUMN_NOTIFICATION_DATE, notification.getNotiDate());
+        values.put(COLUMN_NOTIFICATION_TIME, notification.getNotiTime());
+        values.put(COLUMN_NOTIFICATION_REPEAT_DATE, notification.getNotiRepeatDate());
+        values.put(COLUMN_NOTIFICATION_REPEAT_AMOUNT, notification.getNotiRepeatAmount());
+        values.put(COLUMN_NOTIFICATION_TIME_BEFORE, notification.getNotiTimeBefore());
+
+        long newRowId = db.insert(TABLE_NOTIFICATION, null, values);
+        db.close();
+
+        return newRowId;
     }
 
 }

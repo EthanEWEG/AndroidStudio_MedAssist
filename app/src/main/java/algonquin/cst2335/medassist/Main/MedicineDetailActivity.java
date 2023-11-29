@@ -127,7 +127,7 @@ public class MedicineDetailActivity extends AppCompatActivity {
                 boolean isValid = addFragment.isInputValid(medName, dosage, quantity, frequency, refills, duration, expiration, instructions, docName, docNumber);
 
                 // Check the result
-                if (isValid && addFragment.isValidDate(duration) && addFragment.isValidDate(expiration)) {
+                if (isValid && addFragment.isValidDate(duration, true) && addFragment.isValidDate(expiration, true)) {
                     updateMedicine(medicine.getId());
 
                     //makes the buttons editable

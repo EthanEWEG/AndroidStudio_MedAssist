@@ -1,4 +1,4 @@
-package algonquin.cst2335.medassist;
+package algonquin.cst2335.medassist.Main;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;

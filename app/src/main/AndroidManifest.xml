@@ -37,9 +37,9 @@
         <activity android:name=".Main.MainActivity"/>
         <activity android:name=".Main.MedicineDetailActivity"/>
         <activity android:name=".LoginActivity.ForgotActivity"/>
-
-        <receiver android:name="algonquin.cst2335.medassist.CancelReminderBroadcast"/>
-        <receiver android:name="algonquin.cst2335.medassist.ReminderBroadcast"/>
+        <activity android:name=".Main.SettingsActivity"/>
+        <receiver android:name="algonquin.cst2335.medassist.Main.CancelReminderBroadcast"/>
+        <receiver android:name="algonquin.cst2335.medassist.Main.ReminderBroadcast"/>
     </application>
 
 </manifest>

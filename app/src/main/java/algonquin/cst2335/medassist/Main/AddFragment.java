@@ -52,6 +52,13 @@ public class AddFragment extends DialogFragment{
     // Define a constant for camera permission request
     private static final int REQUEST_CAMERA_PERMISSION = 1;
 
+    private int currentTabId;
+
+    public AddFragment(){}
+    public AddFragment(int currentTabId) {
+        this.currentTabId = currentTabId;
+    }
+
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate your custom layout
@@ -115,7 +122,7 @@ public class AddFragment extends DialogFragment{
                 duration = expiration;
             }
 //
-            if (isInputValid(medName, expiration)){
+            if (isInitialInputValid(medName, expiration)){
             //if(isValidDate(duration, true) && isValidDate(expiration, true)) {
                 // Create a Medicine object with user input
                 Medicine newMedicine = new Medicine(medName, dosage, quantity, frequency, refills, duration, expiration, instructions);
@@ -174,13 +181,13 @@ public class AddFragment extends DialogFragment{
      * @param expiration - The expiration of medicine
      * @return
      */
-    private boolean isInputValid(String medName, String expiration){
+    private boolean isInitialInputValid(String medName, String expiration){
 
         String[] fields = {"Medication Name", "Expiration"};
         int empFieldCount = 0;
 
         for(int i = 0; i < fields.length;i++){
-            String value = getValueByIndex(i, medName, expiration);
+            String value = getInitialValueByIndex(i, medName, expiration);
 
             if (value.isEmpty()) {
                 Toast.makeText(requireContext(), "Please enter " + fields[i] + " value.", Toast.LENGTH_LONG).show();
@@ -195,6 +202,27 @@ public class AddFragment extends DialogFragment{
         return true;
     }
 
+    public boolean isInputValid(String medName, String dosage, String quantity, String frequency, String refills, String duration, String expiration, String instructions, String docName, String docNumber){
+//        return !medName.isEmpty() && !dosage.isEmpty() && !quantity.isEmpty() && !frequency.isEmpty() && !refills.isEmpty() && !duration.isEmpty() && !expiration.isEmpty() && !instructions.isEmpty();
+        String[] fields = {"Medication Name", "Dosage", "Quantity", "Frequency", "Refills", "Duration", "Expiration","Doctor Name", "Doctor Number"};
+        int empFieldCount = 0;
+
+        for(int i = 0; i < fields.length;i++){
+            String value = getValueByIndex(i, medName, dosage, quantity, frequency, refills, duration, expiration, instructions, docName, docNumber);
+
+            if (value.isEmpty()) {
+                Toast.makeText(requireContext(), "Please enter " + fields[i], Toast.LENGTH_LONG).show();
+                empFieldCount++;
+            }
+
+            if (empFieldCount > 0) {
+                Toast.makeText(requireContext(), "Please fill in all the required fields", Toast.LENGTH_LONG).show();
+                return false;
+            }
+        }
+        return true;
+    }
+
     /**
      * Obtains the value of each field and checks to see if it is empty. Else, it will return value.
      * @param index - The ID
@@ -203,12 +231,39 @@ public class AddFragment extends DialogFragment{
 
      * @return - Values for each textField
      */
-    private String getValueByIndex(int index, String medName, String expiration) {
+    private String getInitialValueByIndex(int index, String medName, String expiration) {
         switch (index) {
             case 0:
                 return medName;
             case 1:
                 return expiration;
+            default:
+                return "";
+        }
+    }
+
+    private String getValueByIndex(int index, String medName, String dosage, String quantity, String frequency, String refills, String duration, String expiration, String instructions, String docName, String docNumber) {
+        switch (index) {
+            case 0:
+                return medName;
+            case 1:
+                return dosage;
+            case 2:
+                return quantity;
+            case 3:
+                return frequency;
+            case 4:
+                return refills;
+            case 5:
+                return duration;
+            case 6:
+                return expiration;
+            case 7:
+                return instructions;
+            case 8:
+                return docName;
+            case 9:
+                return docNumber;
             default:
                 return "";
         }
@@ -222,7 +277,7 @@ public class AddFragment extends DialogFragment{
      * @param checkValidity - True to check validity of date
      * @return
      */
-    private boolean isValidDate(String date, boolean checkValidity){
+    public boolean isValidDate(String date, boolean checkValidity){
         if (date.matches("\\d{4}/\\d{2}/\\d{2}")) {
             try {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
