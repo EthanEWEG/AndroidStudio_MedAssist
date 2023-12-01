@@ -53,6 +53,7 @@ public class AddFragment extends DialogFragment{
     private static final int REQUEST_CAMERA_PERMISSION = 1;
 
     private int currentTabId;
+    private Context context;
 
     public AddFragment(){}
     public AddFragment(int currentTabId) {
@@ -205,22 +206,57 @@ public class AddFragment extends DialogFragment{
     public boolean isInputValid(String medName, String dosage, String quantity, String frequency, String refills, String duration, String expiration, String instructions, String docName, String docNumber){
 //        return !medName.isEmpty() && !dosage.isEmpty() && !quantity.isEmpty() && !frequency.isEmpty() && !refills.isEmpty() && !duration.isEmpty() && !expiration.isEmpty() && !instructions.isEmpty();
         String[] fields = {"Medication Name", "Dosage", "Quantity", "Frequency", "Refills", "Duration", "Expiration","Doctor Name", "Doctor Number"};
-        int empFieldCount = 0;
 
+
+        /**
+         * adjust to check individual fields, make sure its correct data type
+         * dosage, quantity, frequency, refills and docNumber already numbers,
+         *
+         * check strings duration, medName, doc name
+         */
         for(int i = 0; i < fields.length;i++){
             String value = getValueByIndex(i, medName, dosage, quantity, frequency, refills, duration, expiration, instructions, docName, docNumber);
 
-            if (value.isEmpty()) {
-                Toast.makeText(requireContext(), "Please enter " + fields[i], Toast.LENGTH_LONG).show();
-                empFieldCount++;
+            if (context == null) {
+                return false; // Handle the case where the context is null
             }
 
-            if (empFieldCount > 0) {
-                Toast.makeText(requireContext(), "Please fill in all the required fields", Toast.LENGTH_LONG).show();
-                return false;
+            switch(fields[i]){
+                case "Medication Name":
+                    // Check if the medication name is not empty
+                    return true;
+                case "Dosage":
+                    return true;
+                case "Quantity":
+                    return true;
+                case "Frequency":
+                    return true;
+                case "Refills":
+                    return true;
+                case "Doctor Number":
+                    return true;
+                    // Check if numeric fields are valid numbers
+                case "Duration":
+                    return true;
+                    // Check if the duration is not empty
+                case "Expiration":
+                    return true;
+                    // Check if the expiration date is valid
+                case "Doctor Name":
+                    return true;
+                    // Check if the doctor name starts with "Dr."
+                    // Add additional cases for other fields if needed
+                default:
+                    // Handle unknown field names or add custom validation logic
+                    return false;
             }
         }
         return true;
+    }
+
+    private void showToast(String message) {
+        // You can use the application context to ensure the Toast is displayed even if the calling class is not an Activity
+        Toast.makeText(requireContext().getApplicationContext(), message, Toast.LENGTH_LONG).show();
     }
 
     /**
@@ -287,7 +323,7 @@ public class AddFragment extends DialogFragment{
                 if (checkDateValidity(parsedDate) && (checkValidity && checkDateIsAfterToday(parsedDate))) {
                     return true;
                 }
-            } catch (DateTimeParseException | ParseException e) {
+            } catch (ParseException e) {
                 return false;
             }
         }
@@ -441,4 +477,7 @@ public class AddFragment extends DialogFragment{
         }
     }
 
+    public void setContext(Context context) {
+        this.context = context;
+    }
 }

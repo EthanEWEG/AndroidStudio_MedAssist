@@ -36,6 +36,9 @@ public class MedicineDetailActivity extends AppCompatActivity {
         deleteButton = binding.medDelete;
         updateButton = binding.medUpdate;
 
+        AddFragment addFragment = new AddFragment();
+        addFragment.setContext(this);
+
         // Retrieve the selected medicine from the intent
         Medicine medicine = getIntent().getParcelableExtra("medicine");
         Doctor doctor = getIntent().getParcelableExtra("doctor");
@@ -110,8 +113,6 @@ public class MedicineDetailActivity extends AppCompatActivity {
                 binding.medUpdate.setText("confirm");
             }
             else if (binding.medUpdate.getText().toString().equals("confirm")){
-
-                AddFragment addFragment = new AddFragment();
 
                 //values to check
                 String medName = binding.medName.getText().toString();

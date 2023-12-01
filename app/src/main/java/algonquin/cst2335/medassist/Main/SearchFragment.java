@@ -75,30 +75,18 @@ public class SearchFragment extends DialogFragment implements RecyclerViewInterf
      * @param query The search query to filter the medicine list.
      */
     private void loadSearchResults(String query) {
-        // Clear the existing search results
-        // searchResults.clear();
-        MedDatabase medDb = new MedDatabase(requireContext());
 
         List<Medicine> medicineList = medDb.getAllMedicines();
         List<Medicine> searchResultsList = new ArrayList<>();
 
-        if (query.isEmpty()) {
-            // If the query is empty, add all medicines to search results
-            searchResultsList.addAll(medicineList);
-        } else {
-            // Perform the search based on the query
-            for (Medicine medicine : medicineList) {
-                // Your search criteria logic here
-                // For example, if medicine.getName() contains the query, add it to search results
-                if (medicine.getName().toLowerCase().contains(query.toLowerCase())) {
-                    searchResultsList.add(medicine);
-                }
+        for (Medicine medicine : medicineList) {
+            if (medicine.getName().toLowerCase().startsWith(query.toLowerCase())) {
+                searchResultsList.add(medicine);
             }
         }
 
-
         // Notify the adapter that the data has changed
-        adapter.notifyDataSetChanged();
+        adapter.updateData(searchResultsList);
 
     }
 

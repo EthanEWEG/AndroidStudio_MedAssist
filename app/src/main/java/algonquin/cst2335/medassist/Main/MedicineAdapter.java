@@ -57,6 +57,7 @@ public class MedicineAdapter extends RecyclerView.Adapter<MedicineAdapter.Medici
         holder.frequency.setText(medicine.getFrequency());
         holder.quantity.setText(medicine.getQuantity());
         holder.calendarIcon.setTag(R.id.medicineID, medicine.getId());
+        holder.bind(medicine);
 
     }
 
@@ -68,6 +69,12 @@ public class MedicineAdapter extends RecyclerView.Adapter<MedicineAdapter.Medici
     @Override
     public int getItemCount() {
         return medicineList.size();
+    }
+
+    public void updateData(List<Medicine> newList) {
+        medicineList.clear();
+        medicineList.addAll(newList);
+        notifyDataSetChanged();
     }
 
     /**
@@ -111,6 +118,14 @@ public class MedicineAdapter extends RecyclerView.Adapter<MedicineAdapter.Medici
             });
 
 
+        }
+
+        public void bind(Medicine medicine) {
+            medicineName.setText(medicine.getName());
+            dosage.setText(medicine.getDosage());
+            frequency.setText(medicine.getFrequency());
+            quantity.setText(medicine.getQuantity());
+            calendarIcon.setTag(R.id.medicineID, medicine.getId());
         }
     }
 }
