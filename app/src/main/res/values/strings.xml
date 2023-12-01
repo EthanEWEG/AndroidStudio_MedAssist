@@ -24,7 +24,7 @@
     <string name="sortDateAdded">added</string>
     <string name="privacy_statement">Privacy Statement</string>
     <string name="push_notifications">Push Notifications</string>
-    <string name="calendar_notifications">Calendar Notifications</string>
+    <string name="calendar_notifications">Automatic expiration Notifications</string>
     <string name="dark_theme">Dark Theme</string>
     <string name="delete_account">Delete Account</string>
     <string name="adjust_font_size">Adjust Font Size</string>

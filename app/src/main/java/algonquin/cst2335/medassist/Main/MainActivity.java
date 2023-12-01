@@ -854,7 +854,6 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
 
 
         //todo
-        // gather all the information and set up notification with it (Calendar notification).
         // setup expiration and duration automatic notifications.
 
         // Set layout parameters for the custom view

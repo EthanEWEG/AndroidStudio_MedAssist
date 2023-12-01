@@ -4,6 +4,7 @@ package algonquin.cst2335.medassist.Main;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.TypedValue;
@@ -146,7 +147,10 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
 
-
+    /**
+     * automatic expiration/duration notifications
+     * @param isEnabled
+     */
     private void setCalendarNotificationsEnabled(boolean isEnabled) {
         if (isEnabled) {
             // Enable calendar notifications using alarm manager.
@@ -157,13 +161,35 @@ public class SettingsActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * disable/enable all notifiactions
+     * @param isEnabled
+     */
     private void setPushNotificationsEnabled(boolean isEnabled) {
         if (isEnabled) {
-            // Enable notifications
-            // If using FCM, inform your server to resume sending notifications to this device.
+            Intent intent = new Intent();
+            intent.setAction("android.settings.APP_NOTIFICATION_SETTINGS");
+
+            //For Android 5-7
+            intent.putExtra("app_package", getPackageName());
+            intent.putExtra("app_uid", getApplicationInfo().uid);
+
+            //For Android 8 and above
+            intent.putExtra("android.provider.extra.APP_PACKAGE", getPackageName());
+
+            startActivity(intent);
         } else {
-            // Disable notifications
-            // If using FCM, inform your server to stop sending notifications to this device.
+            Intent intent = new Intent();
+            intent.setAction("android.settings.APP_NOTIFICATION_SETTINGS");
+
+            //For Android 5-7
+            intent.putExtra("app_package", getPackageName());
+            intent.putExtra("app_uid", getApplicationInfo().uid);
+
+            //For Android 8 and above
+            intent.putExtra("android.provider.extra.APP_PACKAGE", getPackageName());
+
+            startActivity(intent);
         }
     }
 
