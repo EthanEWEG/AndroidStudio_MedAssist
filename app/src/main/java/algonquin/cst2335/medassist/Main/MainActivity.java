@@ -66,37 +66,39 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
         recyclerView.setLayoutManager(layoutManager);
         MedDatabase medDb = new MedDatabase(this);
         /**========================INSERT FAKE PAST MEDICINE============*/
-//        Medicine[] medicines = {
-//                new Medicine("Aspirin", "100", "50", "2", "1", "2022/05/15", "2022/11/30", "Pain Relief"),
-//                new Medicine("Ibuprofen", "200", "100", "3", "1", "2021/08/22", "2022/10/15", "Anti-inflammatory"),
-//                new Medicine("Loratadine", "10", "30", "1", "0", "2022/01/10", "2022/09/25", "Allergy Relief"),
-//                new Medicine("Metformin", "500", "60", "2", "1", "2021/11/05", "2022/07/20", "Diabetes Management"),
-//                new Medicine("Amoxicillin", "250", "20", "1", "1", "2022/03/18", "2022/12/05", "Antibiotic"),
-//                new Medicine("Simvastatin", "40", "30", "1", "0", "2021/09/10", "2022/08/15", "Cholesterol Control"),
-//                new Medicine("Omeprazole", "20", "40", "1", "0", "2022/06/03", "2022/11/10", "Acid Reflux Relief"),
-//                new Medicine("Cetirizine", "5", "25", "1", "0", "2021/12/20", "2022/10/02", "Antihistamine"),
-//                new Medicine("Clopidogrel", "75", "15", "1", "0", "2022/02/14", "2022/09/18", "Blood Thinner"),
-//                new Medicine("Albuterol", "90", "10", "2", "0", "2021/10/30", "2022/12/31", "Asthma Inhaler"),
-//                new Medicine("Diphenhydramine", "25", "50", "1", "0", "2022/04/12", "2022/08/05", "Sleep Aid")
-//        };
-//
-//        Doctor[] doctors = {
-//                new Doctor("Dr. Smith", "1234567890"),
-//                new Doctor("Dr. Johnson", "9876543210"),
-//                new Doctor("Dr. Williams", "5554443333"),
-//                new Doctor("Dr. Brown", "1112223333"),
-//                new Doctor("Dr. Davis", "9998887777"),
-//                new Doctor("Dr. Miller", "7776665555"),
-//                new Doctor("Dr. Wilson", "3332221111"),
-//                new Doctor("Dr. Moore", "4445556666"),
-//                new Doctor("Dr. Taylor", "6667778888"),
-//                new Doctor("Dr. Anderson", "2223334444"),
-//                new Doctor("Dr. Martinez", "8889990000")
-//        };
-//
-//        for (int i = 0; i < medicines.length; i++) {
-//            medDb.insertMedicine(medicines[i], doctors[i]);
-//        }
+        /*
+        Medicine[] medicines = {
+                new Medicine("Aspirin", "100", "50", "2", "1", "2022/05/15", "2022/11/30", "Pain Relief"),
+                new Medicine("Ibuprofen", "200", "100", "3", "1", "2021/08/22", "2022/10/15", "Anti-inflammatory"),
+                new Medicine("Loratadine", "10", "30", "1", "0", "2022/01/10", "2022/09/25", "Allergy Relief"),
+                new Medicine("Metformin", "500", "60", "2", "1", "2021/11/05", "2022/07/20", "Diabetes Management"),
+                new Medicine("Amoxicillin", "250", "20", "1", "1", "2022/03/18", "2022/12/05", "Antibiotic"),
+                new Medicine("Simvastatin", "40", "30", "1", "0", "2021/09/10", "2022/08/15", "Cholesterol Control"),
+                new Medicine("Omeprazole", "20", "40", "1", "0", "2022/06/03", "2022/11/10", "Acid Reflux Relief"),
+                new Medicine("Cetirizine", "5", "25", "1", "0", "2021/12/20", "2022/10/02", "Antihistamine"),
+                new Medicine("Clopidogrel", "75", "15", "1", "0", "2022/02/14", "2022/09/18", "Blood Thinner"),
+                new Medicine("Albuterol", "90", "10", "2", "0", "2021/10/30", "2022/12/31", "Asthma Inhaler"),
+                new Medicine("Diphenhydramine", "25", "50", "1", "0", "2022/04/12", "2022/08/05", "Sleep Aid")
+        };
+
+        Doctor[] doctors = {
+                new Doctor("Dr. Smith", "1234567890"),
+                new Doctor("Dr. Johnson", "9876543210"),
+                new Doctor("Dr. Williams", "5554443333"),
+                new Doctor("Dr. Brown", "1112223333"),
+                new Doctor("Dr. Davis", "9998887777"),
+                new Doctor("Dr. Miller", "7776665555"),
+                new Doctor("Dr. Wilson", "3332221111"),
+                new Doctor("Dr. Moore", "4445556666"),
+                new Doctor("Dr. Taylor", "6667778888"),
+                new Doctor("Dr. Anderson", "2223334444"),
+                new Doctor("Dr. Martinez", "8889990000")
+        };
+
+        for (int i = 0; i < medicines.length; i++) {
+            medDb.insertMedicine(medicines[i], doctors[i]);
+        }
+         */
 
         /**============================INSERT FAKE PAST MEDICINE============*/
         setCurrentMedicineAdapter();
@@ -891,7 +893,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
         }
 
         if (splitTime[2].equals("hours") || splitTime[2].equals("hour")){
-            time = Long.parseLong(splitTime[1])/* * 60 */* 60 * 1000;
+            time = Long.parseLong(splitTime[1]) * 60 * 60 * 1000;
         }
         else if (splitTime[2].equals("days") || splitTime[1].equals("day")){
             time = Long.parseLong(splitTime[1]) * 24 * 60 * 60 * 1000;
