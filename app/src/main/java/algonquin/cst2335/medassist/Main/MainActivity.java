@@ -3,6 +3,7 @@ package algonquin.cst2335.medassist.Main;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.view.ViewCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -123,6 +124,12 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
          * On Click Listener Current Tab
          */
         binding.current.setOnClickListener(click -> {
+            // change button background colours
+            binding.current.setBackgroundColor(0xFFE4C4);
+            binding.past.setBackgroundResource(R.drawable.menu_border);
+            binding.add.setBackgroundResource(R.drawable.menu_border);
+            binding.search.setBackgroundResource(R.drawable.menu_border);
+
             //Hides past recycler view -> displays current recycler view
             //Removes the current fragment (if any)
             Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.fragmentLocation);
@@ -155,6 +162,12 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
          * On Click Listener Past Tab
          */
         binding.past.setOnClickListener(click -> {
+            // change button background colours
+            binding.past.setBackgroundColor(0xFFE4C4);
+            binding.current.setBackgroundResource(R.drawable.menu_border);
+            binding.add.setBackgroundResource(R.drawable.menu_border);
+            binding.search.setBackgroundResource(R.drawable.menu_border);
+
             //Hides current recycler view -> displays past recycler view
             //Removes the current fragment (if any)
             Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.fragmentLocation);
@@ -184,6 +197,11 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
          * On Click Listener Add Tab
          */
         binding.add.setOnClickListener(click -> {
+            // change button background colours
+            binding.add.setBackgroundColor(0xFFE4C4);
+            binding.current.setBackgroundResource(R.drawable.menu_border);
+            binding.past.setBackgroundResource(R.drawable.menu_border);
+            binding.search.setBackgroundResource(R.drawable.menu_border);
 
             //resets searchFragment flag
             isSearchFragmentVisible = false;
@@ -205,6 +223,11 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
          * On Click Listener Search Tab
          */
         binding.search.setOnClickListener(click -> {
+            // change button background colours
+            binding.search.setBackgroundColor(0xFFE4C4);
+            binding.current.setBackgroundResource(R.drawable.menu_border);
+            binding.add.setBackgroundResource(R.drawable.menu_border);
+            binding.past.setBackgroundResource(R.drawable.menu_border);
 
             //resets addFragment flag
             isAddFragmentVisible = false;
