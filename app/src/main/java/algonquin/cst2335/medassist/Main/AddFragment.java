@@ -129,7 +129,7 @@ public class AddFragment extends DialogFragment{
                 Medicine newMedicine = new Medicine(medName, dosage, quantity, frequency, refills, duration, expiration, instructions);
                 Doctor newDoc = new Doctor(docName, docNumber);
 
-                if(isValidDate(expiration, true)) {
+                if(isValidDate(requireContext(), expiration, true) && checkDateIsAfterToday(requireContext(), expiration)) {
                 //if (isInputValid(medName, expiration)) {
                     // Insert the new medicine into the database
                     MedDatabase medDb = new MedDatabase(requireContext());
@@ -139,7 +139,6 @@ public class AddFragment extends DialogFragment{
 
                     if (newRowId != -1) {
                         // Successfully added the medicine to the database, refresh the RecyclerView
-                        //setMedicineAdapterInMainActivity();
                         if(recyclerViewInterface != null){
                             recyclerViewInterface.onMedicineAdded();
                         }
@@ -165,13 +164,14 @@ public class AddFragment extends DialogFragment{
      * @param docNumber - The number entered by user
      * @return - The doctors number if valid, else returns null.
      */
-    private String validateAndFormatPhoneNumber(String docNumber) {
+    public String validateAndFormatPhoneNumber(String docNumber) {
         docNumber = docNumber.replaceAll("[^0-9]", "");
 
         if (docNumber.length() == 10) {
             return docNumber;
         } else {
-            Toast.makeText(requireContext(), "Invalid phone number. Please enter a 10-digit phone number.", Toast.LENGTH_LONG).show();
+            //Toast.makeText(context, "Invalid phone number. Please enter a 10-digit phone number.", Toast.LENGTH_LONG).show();
+            showToast(context, "Invalid phone number. Please enter a 10-digit phone number.");
             return null;
         }
     }
@@ -203,7 +203,7 @@ public class AddFragment extends DialogFragment{
         return true;
     }
 
-    public boolean isInputValid(String medName, String dosage, String quantity, String frequency, String refills, String duration, String expiration, String instructions, String docName, String docNumber){
+    public boolean isInputValid(Context context, Boolean currentMed, String medName, String dosage, String quantity, String frequency, String refills, String duration, String expiration, String instructions, String docName, String docNumber){
 //        return !medName.isEmpty() && !dosage.isEmpty() && !quantity.isEmpty() && !frequency.isEmpty() && !refills.isEmpty() && !duration.isEmpty() && !expiration.isEmpty() && !instructions.isEmpty();
         String[] fields = {"Medication Name", "Dosage", "Quantity", "Frequency", "Refills", "Duration", "Expiration","Doctor Name", "Doctor Number"};
 
@@ -223,40 +223,85 @@ public class AddFragment extends DialogFragment{
 
             switch(fields[i]){
                 case "Medication Name":
-                    // Check if the medication name is not empty
-                    return true;
+                    if (value.trim().isEmpty()) {
+                        //Toast.makeText(context, "Medication Name cannot be empty.", Toast.LENGTH_SHORT).show();
+                        showToast(context, "Medication Name cannot be empty.");
+                        return false;
+                    }
+                    break;
                 case "Dosage":
-                    return true;
+                    if (!value.trim().isEmpty() && Double.parseDouble(value) < 0) {
+                        //Toast.makeText(context, "Dosage cannot be below 0.", Toast.LENGTH_SHORT).show();
+                        showToast(context, "Dosage cannot be below 0.");
+                        return false;
+                    }
+                    break;
                 case "Quantity":
-                    return true;
+                    if (!value.trim().isEmpty() && Integer.parseInt(value) < 0) {
+                        Toast.makeText(context, "Quantity cannot be below 0.", Toast.LENGTH_SHORT).show();
+                        showToast(context, "Quantity cannot be below 0.");
+                        return false;
+                    }
+                    break;
                 case "Frequency":
-                    return true;
+                    if (value.trim().isEmpty()) {
+                        // Frequency can be empty
+                        return true;
+                    }
+                    if (!value.matches(".*\\d+.*")) {
+                        //Toast.makeText(context, "Frequency should contain a number value.", Toast.LENGTH_SHORT).show();
+                        showToast(context, "Frequency should contain a number value.");
+                        return false;
+                    }
+                    break;
                 case "Refills":
-                    return true;
+                    if (!value.trim().isEmpty() && Integer.parseInt(value) < 0) {
+                        //Toast.makeText(context, "Refills cannot be below 0.", Toast.LENGTH_SHORT).show();
+                        showToast(context, "Refills cannot be below 0.");
+                        return false;
+                    }
+                    break;
                 case "Doctor Number":
-                    return true;
-                    // Check if numeric fields are valid numbers
+                    if (!value.trim().isEmpty()) {
+                        // Validate and format the phone number
+                        String formattedNumber = validateAndFormatPhoneNumber(value);
+                        if (formattedNumber == null) {
+                            return false; // Invalid phone number format
+                        }
+                        // Update the value with the formatted phone number
+                        value = formattedNumber;
+                    }
+                    break;
                 case "Duration":
-                    return true;
-                    // Check if the duration is not empty
+                    if(value.trim().isEmpty()){
+                        value.equals(fields[6]);
+                    }
+                     break;
                 case "Expiration":
-                    return true;
-                    // Check if the expiration date is valid
+                    if (currentMed) {
+                        // Call an existing method isValidDate for current medicine
+                        return isValidDate(context, value, true);
+                    }else{
+                        if (isValidDate(context, value, true)) {
+                            return true;
+                        } else {
+                            showToast(context, "Invalid date entered");
+                        }
+                    }
+                    // For past medicine, keep the previous value
+                    break;
                 case "Doctor Name":
-                    return true;
-                    // Check if the doctor name starts with "Dr."
-                    // Add additional cases for other fields if needed
+                    break;
                 default:
-                    // Handle unknown field names or add custom validation logic
                     return false;
             }
         }
         return true;
     }
 
-    private void showToast(String message) {
+    private void showToast(Context context, String message) {
         // You can use the application context to ensure the Toast is displayed even if the calling class is not an Activity
-        Toast.makeText(requireContext().getApplicationContext(), message, Toast.LENGTH_LONG).show();
+        Toast.makeText(context.getApplicationContext(), message, Toast.LENGTH_LONG).show();
     }
 
     /**
@@ -313,14 +358,19 @@ public class AddFragment extends DialogFragment{
      * @param checkValidity - True to check validity of date
      * @return
      */
-    public boolean isValidDate(String date, boolean checkValidity){
+    public boolean isValidDate(Context context, String date, boolean checkValidity){
+        if (context == null) {
+            // Handle the case where the context is null, e.g., return false or throw an exception
+            return false;
+        }
+
         if (date.matches("\\d{4}/\\d{2}/\\d{2}")) {
             try {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
                 sdf.setLenient(false);
                 Date parsedDate = sdf.parse(date);
 
-                if (checkDateValidity(parsedDate) && (checkValidity && checkDateIsAfterToday(parsedDate))) {
+                if (checkDateValidity(parsedDate) && (checkValidity /*&& checkDateIsAfterToday(context, parsedDate)*/)) {
                     return true;
                 }
             } catch (ParseException e) {
@@ -365,16 +415,31 @@ public class AddFragment extends DialogFragment{
      * @return - True, if the date entered is after current date. False, if date entered is before
      *           current date.
      */
-    private boolean checkDateIsAfterToday(Date date) {
-        long dateMillis = date.getTime();
-        long currentDateMillis = System.currentTimeMillis();
-
-        if (dateMillis < currentDateMillis) {
-            Toast.makeText(requireContext(), "Invalid date. Please enter a date after today.", Toast.LENGTH_LONG).show();
+    private boolean checkDateIsAfterToday(Context context, String date) {
+        if (context == null) {
+            // Handle the case where the context is null, e.g., return false or throw an exception
             return false;
         }
 
-        return true;
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
+            sdf.setLenient(false);
+            Date parsedDate = sdf.parse(date);
+
+            long dateMillis = parsedDate.getTime();
+            long currentDateMillis = System.currentTimeMillis();
+
+            if (dateMillis < currentDateMillis) {
+                //Toast.makeText(requireContext(), "Invalid date. Please enter a date after today.", Toast.LENGTH_LONG).show();
+                showToast(context, "Invalid date. Please enter a date after today.");
+                return false;
+            }
+
+            return true;
+        }catch(ParseException e){
+            return false;
+        }
+
     }
 
     /**

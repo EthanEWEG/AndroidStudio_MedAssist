@@ -17,6 +17,7 @@ import android.app.PendingIntent;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -60,6 +61,20 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
 
         binding = MedViewBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        boolean userCred = getIntent().getBooleanExtra("userCred", true);
+        if(userCred){
+            setCurrentMedicineAdapter();
+        }
+        boolean isCurrentMedicine = getIntent().getBooleanExtra("isCurrentMedicine", true);
+
+        // Assuming you have methods like setCurrentMedicineAdapter and setPastMedicineAdapter
+        if (isCurrentMedicine) {
+            setCurrentMedicineAdapter();
+        } else {
+            setPastMedicineAdapter();
+        }
+
 
         RecyclerView recyclerView = findViewById(R.id.recyclerView);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
@@ -235,7 +250,6 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
         binding.sortDateAdded.setOnClickListener(click -> {
             toggleSortingOrder(SortCriteria.ADDED);
         });
-
     }
 
     /**
@@ -357,12 +371,14 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
     public void onItemClick(int position, View clickedView) {
         MedDatabase medDb = new MedDatabase(this);
         int currentTabId = getCurrentTabId();
-
+        boolean tabId = true;
         List<Medicine> medList = new ArrayList<>();
         if (currentTabId == R.id.current) {
             medList = new ArrayList<>(medDb.getCurrentMedicines());
+            tabId = true;
         } else if (currentTabId == R.id.past){
             medList = new ArrayList<>(medDb.getPastMedicines());
+            tabId = false;
         }
         // Check if the position is valid
         if (position >= 0 && position < medList.size()) {
@@ -375,6 +391,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
             Intent intent = new Intent(this, MedicineDetailActivity.class);
             intent.putExtra("medicine", selectedMedicine);
             intent.putExtra("doctor", linkedDoctor);
+            intent.putExtra("currentTabId", tabId);
             startActivity(intent);
         }
     }
@@ -389,11 +406,13 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
      * @see #setPastMedicineAdapter()
      */
     @Override
-    public void onMedicineDeleted() {
+    public void onMedicineDetail() {
         if(currentTabId == R.id.current){
             setCurrentMedicineAdapter();
+            finish();
         }else if(currentTabId == R.id.past){
             setPastMedicineAdapter();
+            finish();
         }
     }
 

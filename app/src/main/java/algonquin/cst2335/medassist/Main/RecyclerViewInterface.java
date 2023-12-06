@@ -4,6 +4,6 @@ import android.view.View;
 
 interface RecyclerViewInterface {
     void onItemClick(int position, View v);
-    void onMedicineDeleted();
+    void onMedicineDetail();
     void onMedicineAdded();
 }

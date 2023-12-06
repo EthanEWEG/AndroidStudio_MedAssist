@@ -1,5 +1,6 @@
 package algonquin.cst2335.medassist.Main;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.os.Handler;
@@ -25,6 +26,7 @@ public class MedicineDetailActivity extends AppCompatActivity {
     private Medicine medicineToUpdate;
     private Medicine originalMedicine;
 
+    private Doctor originalDoc;
     private Doctor docToUpdate;
 
     @Override
@@ -43,7 +45,9 @@ public class MedicineDetailActivity extends AppCompatActivity {
         Medicine medicine = getIntent().getParcelableExtra("medicine");
         Doctor doctor = getIntent().getParcelableExtra("doctor");
         int position = getIntent().getIntExtra("position", -1);
+        boolean isCurrentMedicine = getIntent().getBooleanExtra("currentTabId", true);
 
+        Log.w("CurrentTabID===========", String.valueOf(isCurrentMedicine));
         Log.d("durationAtStart",medicine.getDuration());
 
         if (medicine != null) {
@@ -73,7 +77,7 @@ public class MedicineDetailActivity extends AppCompatActivity {
             deleteMedicine();
 
             if (recyclerViewInterface != null) {
-                recyclerViewInterface.onMedicineDeleted();
+                recyclerViewInterface.onMedicineDetail();
             }
             new Handler().postDelayed(() -> finish(), 7000);
         });
@@ -126,11 +130,16 @@ public class MedicineDetailActivity extends AppCompatActivity {
                 String docNumber = binding.medDocNumberValue.getText().toString();
                 String instructions = binding.medInstructionsValue.getText().toString();
 
-                // Call the isInputValid method
-                boolean isValid = addFragment.isInputValid(medName, dosage, quantity, frequency, refills, duration, expiration, instructions, docName, docNumber);
 
+                // Call the isInputValid method
+                boolean isValid = addFragment.isInputValid(this, isCurrentMedicine, medName, dosage, quantity, frequency, refills, duration, expiration, instructions, docName, docNumber);
+                boolean isPhoneValid = true;
+                if(!docNumber.isEmpty()){
+                    String formattedNumber = addFragment.validateAndFormatPhoneNumber(docNumber);
+                    isPhoneValid = (formattedNumber != null && formattedNumber.length() == 10);
+                }
                 // Check the result
-                if (isValid && addFragment.isValidDate(duration, true) && addFragment.isValidDate(expiration, true)) {
+                if (isValid && isPhoneValid/*&& addFragment.isValidDate(duration, true) && addFragment.isValidDate(expiration, true)*/) {
                     updateMedicine(medicine.getId());
 
                     //makes the buttons editable
@@ -163,6 +172,8 @@ public class MedicineDetailActivity extends AppCompatActivity {
 
                     binding.medUpdate.setText("update");
 
+                    callMainActivityMethod(isCurrentMedicine, 3500);
+
                 }
                 else {
                     // The input is not valid
@@ -171,7 +182,6 @@ public class MedicineDetailActivity extends AppCompatActivity {
                 }
 
             }
-
 
         });
     }
@@ -222,11 +232,9 @@ public class MedicineDetailActivity extends AppCompatActivity {
 
         docToUpdate = new Doctor(docName, docNumber);
 
-        //todo missing updateDocotor.
-
         // Call the method from MedDatabase to update the record
         MedDatabase dbHelper = new MedDatabase(this);
-        dbHelper.updateMedicine(medicineToUpdate.getId(), medicineToUpdate);
+        dbHelper.updateMedicine(medicineToUpdate.getId(), medicineToUpdate, docToUpdate);
     }
 
     /**
@@ -259,15 +267,28 @@ public class MedicineDetailActivity extends AppCompatActivity {
             binding.medRefillValue.setText(originalMedicine.getRefills());
             binding.medDurationValue.setText(originalMedicine.getDuration());
             binding.medExpirationValue.setText(originalMedicine.getExpiration());
+            binding.medDocNameValue.setText(originalDoc.getDocName());
+            binding.medDocNumberValue.setText(originalDoc.getDocNumber());
             binding.medInstructionsValue.setText(originalMedicine.getInstructions());
             originalMedicine.setId(medicineId);
 
             // Call the method from MedDatabase to update the record with original values
             MedDatabase dbHelper = new MedDatabase(this);
-            dbHelper.updateMedicine(originalMedicine.getId(), originalMedicine); // Assuming you don't need to update the doctor info
+            dbHelper.updateMedicine(originalMedicine.getId(), originalMedicine, originalDoc); // Assuming you don't need to update the doctor info
 
             // Clear the originalMedicine variable
             originalMedicine = null;
         }
     }
+
+    private void callMainActivityMethod(boolean isCurrentMedicine, long delayMillis) {
+        new Handler().postDelayed(() -> {
+            Intent intent = new Intent(this, MainActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            intent.putExtra("isCurrentMedicine", isCurrentMedicine);
+            startActivity(intent);
+            finish();
+        }, delayMillis);
+    }
 }
+

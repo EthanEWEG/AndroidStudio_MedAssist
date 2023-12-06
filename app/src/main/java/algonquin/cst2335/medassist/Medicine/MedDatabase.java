@@ -17,6 +17,7 @@ import algonquin.cst2335.medassist.Main.NotificationMed;
 
 @SuppressWarnings("Range")
 public class MedDatabase extends SQLiteOpenHelper {
+    private String currentUser;
     private static final String DATABASE_NAME = "medicine_db";
     private static final int DATABASE_VERSION = 1;
 
@@ -163,27 +164,6 @@ public class MedDatabase extends SQLiteOpenHelper {
     }
 
     /**
-     * Inserts user login information into database
-     * @param username - username of user
-     * @param password - password of user
-     * @param passcode - numerical passcode to recover account information
-     * @return ID - User login information
-     */
-    public long insertUser(String username, String password, String passcode) {
-        SQLiteDatabase db = this.getWritableDatabase();
-
-        ContentValues values = new ContentValues();
-        values.put(COLUMN_USERNAME, username);
-        values.put(COLUMN_PASSWORD, password);
-        values.put(COLUMN_PASSCODE, passcode);
-
-        long newRowId = db.insert(TABLE_USERS, null, values);
-        db.close();
-
-        return newRowId;
-    }
-
-    /**
      * Retrieves all medicine information in database
      * @return - List of medicine
      */
@@ -324,7 +304,7 @@ public class MedDatabase extends SQLiteOpenHelper {
      * @param medicine - The name of the medicine being updated
      * @return - The udpated medicine information in database
      */
-    public int updateMedicine(long id, Medicine medicine) {
+    public int updateMedicine(long id, Medicine medicine, Doctor doctor) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
@@ -341,6 +321,25 @@ public class MedDatabase extends SQLiteOpenHelper {
         String[] selectionArgs = { String.valueOf(id) };
 
         int count = db.update(TABLE_MEDICINE, values, selection, selectionArgs);
+
+        if (doctor != null) {
+            ContentValues doctorValues = new ContentValues();
+            doctorValues.put(COLUMN_DOCNAME, doctor.getDocName());
+            doctorValues.put(COLUMN_DOCNUM, doctor.getDocNumber());
+
+            String doctorSelection = COLUMN_DOC_ID + " = ?";
+            String[] doctorSelectionArgs = {String.valueOf(id)};
+
+            int doctorUpdateCount = db.update(TABLE_DOCTOR, doctorValues, doctorSelection, doctorSelectionArgs);
+
+            // If no rows were updated for the doctor, insert a new record
+            if (doctorUpdateCount == 0) {
+                doctorValues.put(COLUMN_DOC_ID, id); // Use medicine ID as the foreign key
+                db.insert(TABLE_DOCTOR, null, doctorValues);
+            }
+        }
+
+
         db.close();
 
         return count;
@@ -511,6 +510,27 @@ public class MedDatabase extends SQLiteOpenHelper {
     }
 
     /**
+     * Inserts user login information into database
+     * @param username - username of user
+     * @param password - password of user
+     * @param passcode - numerical passcode to recover account information
+     * @return ID - User login information
+     */
+    public long insertUser(String username, String password, String passcode) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_USERNAME, username);
+        values.put(COLUMN_PASSWORD, password);
+        values.put(COLUMN_PASSCODE, passcode);
+
+        long newRowId = db.insert(TABLE_USERS, null, values);
+        db.close();
+
+        return newRowId;
+    }
+
+    /**
      * Method to check if user exists in the database before being granted access
      * @param username - username entered from the user
      * @param password - password entered from the user
@@ -561,6 +581,56 @@ public class MedDatabase extends SQLiteOpenHelper {
 
         return result;
     }
+
+    /**
+     * Deletes the user with the specified username from the database.
+     * @param username - The username of the user to be deleted.
+     * @return - The number of rows affected. Returns 0 if no user with the given username is found.
+     */
+    public int deleteUser(String username) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        // Define the WHERE clause to find the user with the given username
+        String selection = COLUMN_USERNAME + " = ?";
+        String[] selectionArgs = {username};
+
+        // Delete the user based on the WHERE clause
+        int rowsDeleted = db.delete(TABLE_USERS, selection, selectionArgs);
+
+        // Close the database
+        db.close();
+
+        return rowsDeleted;
+    }
+
+    public void setCurrentUser(String currentUser) {
+        this.currentUser = currentUser;
+    }
+
+    public String getCurrentUser(){
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        // Define the columns to be retrieved
+        String[] projection = {COLUMN_USERNAME};
+
+        // Query to retrieve the current user
+        Cursor cursor = db.query(TABLE_USERS, projection, null, null, null, null, null);
+
+        String currentUser = null;
+
+        // Check if the cursor has data and move to the first row
+        if (cursor.moveToFirst()) {
+            // Retrieve the username from the cursor
+            currentUser = cursor.getString(cursor.getColumnIndex(COLUMN_USERNAME));
+        }
+
+        // Close the cursor and database
+        cursor.close();
+        db.close();
+
+        return currentUser;
+    }
+
 
     /**
      * Deletes the notification based on ID in database

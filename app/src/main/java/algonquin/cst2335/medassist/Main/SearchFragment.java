@@ -102,12 +102,12 @@ public class SearchFragment extends DialogFragment implements RecyclerViewInterf
     }
 
     @Override
-    public void onMedicineDeleted() {
+    public void onMedicineAdded() {
 
     }
 
     @Override
-    public void onMedicineAdded() {
+    public void onMedicineDetail() {
 
     }
 }

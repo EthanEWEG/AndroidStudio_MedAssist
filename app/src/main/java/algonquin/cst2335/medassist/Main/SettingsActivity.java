@@ -1,10 +1,12 @@
 package algonquin.cst2335.medassist.Main;
 
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 
 import android.content.Intent;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.TypedValue;
@@ -14,7 +16,10 @@ import android.widget.Button;
 import android.widget.RadioGroup;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import algonquin.cst2335.medassist.LoginActivity.LoginActivity;
+import algonquin.cst2335.medassist.Medicine.MedDatabase;
 import algonquin.cst2335.medassist.R;
 
 public class SettingsActivity extends AppCompatActivity {
@@ -24,6 +29,8 @@ public class SettingsActivity extends AppCompatActivity {
     private RadioGroup radiofontsize;
     private TextView fontSizeLabel;
     private ViewGroup rootView;
+
+    private MedDatabase medDb;
 
     private static final int SMALL_FONT_SIZE = R.dimen.small_font_size;
     private static final int MEDIUM_FONT_SIZE = R.dimen.medium_font_size;
@@ -61,6 +68,54 @@ public class SettingsActivity extends AppCompatActivity {
         } else if (selectedFontSize == R.dimen.large_font_size) {
             radiofontsize.check(R.id.largeFontSizeRadioButton);
         }
+
+        deleteAccountBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(SettingsActivity.this);
+                builder.setTitle("Confirm Deletion");
+                builder.setMessage("Are you sure you want to delete your account? This action cannot be undone.");
+
+                // Positive button (Yes)
+                builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        MedDatabase medDb = new MedDatabase(SettingsActivity.this);
+                        String currentUserUsername = medDb.getCurrentUser(); // Replace with your actual variable
+
+                        // Delete the user from the database
+                        int rowsDeleted = medDb.deleteUser(currentUserUsername);
+
+                        if (rowsDeleted > 0) {
+                            // User deleted successfully
+                            // You can perform any additional actions here
+                            Toast.makeText(SettingsActivity.this, "User deleted successfully", Toast.LENGTH_SHORT).show();
+                            Intent loginIntent = new Intent(SettingsActivity.this, LoginActivity.class);
+                            loginIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(loginIntent);
+                            finish();
+                        } else {
+                            // No user found with the given username
+                            // Handle accordingly
+                            Toast.makeText(SettingsActivity.this, "User not found or deletion failed", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+
+                // Negative button (No)
+                builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        // User clicked No, do nothing (dismiss the dialog)
+                    }
+                });
+
+                // Show the AlertDialog
+                AlertDialog alertDialog = builder.create();
+                alertDialog.show();
+            }
+
+        });
     }
 
     private void initializeViews() {

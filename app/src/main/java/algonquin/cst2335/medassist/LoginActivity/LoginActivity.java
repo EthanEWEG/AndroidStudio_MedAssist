@@ -42,11 +42,12 @@ public class LoginActivity extends AppCompatActivity{
             // Get the email address from the EditText
             String username = binding.userEditText.getText().toString();
             String password = binding.passwordEditText.getText().toString();
-
+            boolean userCredential = checkUserCredentials(username, password);
             if (checkUserCredentials(username, password)) {
                 // If a matching record is found, proceed to the next activity (e.g., MainActivity)
+                setCurrentUser(username);
                 Intent nextPage = new Intent(LoginActivity.this, MainActivity.class);
-                nextPage.putExtra("Username", username); // Pass the username to the next activity
+                nextPage.putExtra("userCred", userCredential); // Pass the username to the next activity
                 startActivity(nextPage);
             } else {
                 // If no matching record is found, show an error message
@@ -64,6 +65,11 @@ public class LoginActivity extends AppCompatActivity{
             startActivity(forgotIntent);
         }));
 
+    }
+
+    private void setCurrentUser(String username) {
+        MedDatabase medDb = new MedDatabase(this);
+        medDb.setCurrentUser(username);
     }
 
     private boolean checkUserCredentials(String username, String password) {
