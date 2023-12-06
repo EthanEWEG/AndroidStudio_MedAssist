@@ -20,7 +20,7 @@ public class ReminderBroadcast extends BroadcastReceiver {
 
         // Create an intent to launch your application
         Intent launchIntent = new Intent(context, MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, launchIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, launchIntent, PendingIntent.FLAG_IMMUTABLE);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "notifyMed")
                 .setSmallIcon(R.drawable.notificationicon)

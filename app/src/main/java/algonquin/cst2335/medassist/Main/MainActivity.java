@@ -706,7 +706,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
 
                         //Cancels the existing PendingIntent
                         Intent cancelIntent = new Intent(this, ReminderBroadcast.class);
-                        PendingIntent cancelPendingIntent = PendingIntent.getBroadcast(algonquin.cst2335.medassist.Main.MainActivity.this, Integer.parseInt(medicineId), cancelIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                        PendingIntent cancelPendingIntent = PendingIntent.getBroadcast(algonquin.cst2335.medassist.Main.MainActivity.this, Integer.parseInt(medicineId), cancelIntent, PendingIntent.FLAG_IMMUTABLE);
                         AlarmManager cancelAlarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
                         cancelAlarmManager.cancel(cancelPendingIntent);
 
@@ -714,7 +714,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
                         Intent intent = new Intent(this, ReminderBroadcast.class);
                         intent.putExtra("medicineTitle", alertTitle.getText().toString());
                         intent.putExtra("frequency", medDb.getFrequencyById(medicineID));
-                        PendingIntent pendingIntent = PendingIntent.getBroadcast(algonquin.cst2335.medassist.Main.MainActivity.this,Integer.parseInt(medicineId),intent,PendingIntent.FLAG_UPDATE_CURRENT);
+                        PendingIntent pendingIntent = PendingIntent.getBroadcast(algonquin.cst2335.medassist.Main.MainActivity.this,Integer.parseInt(medicineId),intent,PendingIntent.FLAG_IMMUTABLE);
 
                         AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
                         long triggerTime = calculateTriggerTime(notificationDate, notificationTime, notificationTimeBefore);
@@ -733,7 +733,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
                             // Cancel the existing PendingIntent after occurences
                             Intent cancellationIntent = new Intent(this, CancelReminderBroadcast.class);
                             cancellationIntent.putExtra("key", pendingIntent);
-                            PendingIntent cancellationPendingIntent = PendingIntent.getBroadcast(this, Integer.parseInt(medicineId), cancellationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                            PendingIntent cancellationPendingIntent = PendingIntent.getBroadcast(this, Integer.parseInt(medicineId), cancellationIntent, PendingIntent.FLAG_IMMUTABLE);
                             alarmManager.set(AlarmManager.RTC_WAKEUP, triggerTime + intervalTime * Long.parseLong(repeatAmount[2]), cancellationPendingIntent);
                         }
 
@@ -771,7 +771,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
 
                         // Cancel the existing PendingIntent
                         Intent cancelIntent = new Intent(this, ReminderBroadcast.class);
-                        PendingIntent cancelPendingIntent = PendingIntent.getBroadcast(algonquin.cst2335.medassist.Main.MainActivity.this, Integer.parseInt(medicineId), cancelIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                        PendingIntent cancelPendingIntent = PendingIntent.getBroadcast(algonquin.cst2335.medassist.Main.MainActivity.this, Integer.parseInt(medicineId), cancelIntent, PendingIntent.FLAG_IMMUTABLE);
                         AlarmManager cancelAlarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
                         cancelAlarmManager.cancel(cancelPendingIntent);
                     } else {
@@ -852,7 +852,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
                     Intent intent = new Intent(this, ReminderBroadcast.class);
                     intent.putExtra("medicineTitle", alertTitle.getText().toString());
                     intent.putExtra("frequency", medDb.getFrequencyById(medicineID));
-                    PendingIntent pendingIntent = PendingIntent.getBroadcast(algonquin.cst2335.medassist.Main.MainActivity.this,Integer.parseInt(medicineId),intent,PendingIntent.FLAG_UPDATE_CURRENT);
+                    PendingIntent pendingIntent = PendingIntent.getBroadcast(algonquin.cst2335.medassist.Main.MainActivity.this,Integer.parseInt(medicineId),intent,PendingIntent.FLAG_IMMUTABLE);
 
                     AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
                     long triggerTime = calculateTriggerTime(notificationDate, notificationTime, notificationTimeBefore);
@@ -871,7 +871,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
                         // Cancel the existing PendingIntent after occurences
                         Intent cancellationIntent = new Intent(this, CancelReminderBroadcast.class);
                         cancellationIntent.putExtra("key", pendingIntent);
-                        PendingIntent cancellationPendingIntent = PendingIntent.getBroadcast(this, Integer.parseInt(medicineId), cancellationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                        PendingIntent cancellationPendingIntent = PendingIntent.getBroadcast(this, Integer.parseInt(medicineId), cancellationIntent, PendingIntent.FLAG_IMMUTABLE);
                         alarmManager.set(AlarmManager.RTC_WAKEUP, triggerTime + intervalTime * Long.parseLong(repeatAmount[2]), cancellationPendingIntent);
                     }
                 } else {
