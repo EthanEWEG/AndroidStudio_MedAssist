@@ -24,6 +24,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CalendarView;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.view.View;
@@ -306,7 +307,18 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewInter
             // If a different sorting criteria is clicked, reset the order to ascending
             currentSortOrder = SortOrder.ASCENDING;
         }
+
+        binding.arrowAlphabetic.setVisibility((sortCriteria == SortCriteria.NAME) ? View.VISIBLE : View.GONE);
+        binding.arrowFrequency.setVisibility((sortCriteria == SortCriteria.FREQUENCY) ? View.VISIBLE : View.GONE);
+        binding.arrowDateAdded.setVisibility((sortCriteria == SortCriteria.ADDED) ? View.VISIBLE : View.GONE);
+
+        // Update arrow direction based on currentSortOrder
+        binding.arrowAlphabetic.setImageResource((currentSortOrder == SortOrder.ASCENDING) ? R.drawable.ic_arrow_up : R.drawable.ic_arrow_down);
+        binding.arrowFrequency.setImageResource((currentSortOrder == SortOrder.ASCENDING) ? R.drawable.ic_arrow_up : R.drawable.ic_arrow_down);
+        binding.arrowDateAdded.setImageResource((currentSortOrder == SortOrder.ASCENDING) ? R.drawable.ic_arrow_up : R.drawable.ic_arrow_down);
+
         showSortingOrderToast(sortCriteria);
+        //updateSortingArrows();
         previousSortCriteria = sortCriteria;
         sortAndSetAdapter(sortCriteria);
     }

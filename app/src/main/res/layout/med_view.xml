@@ -117,6 +117,42 @@
                 app:layout_constraintStart_toEndOf="@id/sortFrequency"
                 app:layout_constraintEnd_toEndOf="parent"/>
 
+            <ImageView
+                android:id="@+id/arrowAlphabetic"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginStart="5dp"
+                android:src="@drawable/ic_arrow_up"
+                android:visibility="gone"
+                app:layout_constraintTop_toTopOf="@id/sortAlphabetic"
+                app:layout_constraintBottom_toBottomOf="@id/sortAlphabetic"
+                app:layout_constraintStart_toEndOf="@id/sortAlphabetic"
+                app:layout_constraintEnd_toStartOf="@id/sortFrequency" />
+
+            <ImageView
+                android:id="@+id/arrowFrequency"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginStart="5dp"
+                android:src="@drawable/ic_arrow_up"
+                android:visibility="gone"
+                app:layout_constraintTop_toTopOf="@id/sortFrequency"
+                app:layout_constraintBottom_toBottomOf="@id/sortFrequency"
+                app:layout_constraintStart_toEndOf="@id/sortFrequency"
+                app:layout_constraintEnd_toStartOf="@id/sortDateAdded" />
+
+            <ImageView
+                android:id="@+id/arrowDateAdded"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginStart="5dp"
+                android:src="@drawable/ic_arrow_up"
+                android:visibility="gone"
+                app:layout_constraintTop_toTopOf="@id/sortDateAdded"
+                app:layout_constraintBottom_toBottomOf="@id/sortDateAdded"
+                app:layout_constraintStart_toEndOf="@id/sortDateAdded"
+                app:layout_constraintEnd_toEndOf="parent" />
+
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerView"
                 android:layout_width="0dp"
